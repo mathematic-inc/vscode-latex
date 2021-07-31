@@ -1,0 +1,274 @@
+{
+  "name": "vscode-latex",
+  "displayName": "LaTeX",
+  "description": "LaTeX language support for Visual Studio Code.",
+  "version": "0.0.3",
+  "engines": {
+    "vscode": "^1.58.1"
+  },
+  "icon": "icon.png",
+  "publisher": "mathematic",
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onLanguage:tex",
+    "onLanguage:latex",
+    "onLanguage:latex-expl3",
+    "onLanguage:doctex",
+    "onLanguage:jlweave",
+    "onLanguage:rsweave",
+    "onLanguage:bibtex"
+  ],
+  "license": "Apache-2.0",
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "tex",
+        "aliases": [
+          "TeX",
+          "tex"
+        ],
+        "extensions": [
+          ".sty",
+          ".cls",
+          ".bbx",
+          ".cbx"
+        ],
+        "configuration": "./syntax/syntax.json"
+      },
+      {
+        "id": "doctex",
+        "aliases": [
+          "DocTeX",
+          "doctex"
+        ],
+        "extensions": [
+          ".dtx"
+        ],
+        "configuration": "./syntax/syntax-doctex.json"
+      },
+      {
+        "id": "latex",
+        "aliases": [
+          "LaTeX",
+          "latex"
+        ],
+        "extensions": [
+          ".tex",
+          ".ltx",
+          ".ctx"
+        ],
+        "configuration": "./syntax/syntax.json"
+      },
+      {
+        "id": "bibtex",
+        "aliases": [
+          "BibTeX",
+          "bibtex"
+        ],
+        "extensions": [
+          ".bib"
+        ]
+      },
+      {
+        "id": "bibtex-style",
+        "aliases": [
+          "BibTeX style"
+        ],
+        "extensions": [
+          ".bst"
+        ]
+      },
+      {
+        "id": "latex-expl3",
+        "aliases": [
+          "LaTeX-Expl3"
+        ],
+        "configuration": "./syntax/syntax-expl3.json"
+      },
+      {
+        "id": "jlweave",
+        "aliases": [
+          "Weave.jl"
+        ],
+        "extensions": [
+          ".jnw",
+          ".jtexw"
+        ],
+        "configuration": "./syntax/syntax-weave.json"
+      },
+      {
+        "id": "rsweave",
+        "aliases": [
+          "R Sweave"
+        ],
+        "extensions": [
+          ".rnw",
+          ".Rnw",
+          ".Rtex",
+          ".rtex",
+          ".snw",
+          ".Snw"
+        ],
+        "configuration": "./syntax/syntax-weave.json"
+      },
+      {
+        "id": "cpp_embedded_latex",
+        "configuration": "./syntax/syntax-cpp-embedded.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "tex",
+        "scopeName": "text.tex",
+        "path": "./syntax/TeX.tmLanguage.json"
+      },
+      {
+        "language": "doctex",
+        "scopeName": "text.tex.doctex",
+        "path": "./syntax/DocTeX.tmLanguage.json"
+      },
+      {
+        "language": "latex",
+        "scopeName": "text.tex.latex",
+        "path": "./syntax/LaTeX.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.asymptote": "asymptote",
+          "source.cpp": "cpp_embedded_latex",
+          "source.css": "css",
+          "source.dot": "dot",
+          "source.gnuplot": "gnuplot",
+          "text.html": "html",
+          "source.java": "java",
+          "source.js": "javascript",
+          "source.julia": "julia",
+          "source.lua": "lua",
+          "source.python": "python",
+          "source.ruby": "ruby",
+          "source.scala": "scala",
+          "source.ts": "typescript",
+          "text.xml": "xml",
+          "source.yaml": "yaml"
+        }
+      },
+      {
+        "language": "bibtex",
+        "scopeName": "text.bibtex",
+        "path": "./syntax/Bibtex.tmLanguage.json"
+      },
+      {
+        "language": "bibtex-style",
+        "scopeName": "source.bst",
+        "path": "./syntax/BibTeX-style.tmLanguage.json"
+      },
+      {
+        "language": "latex-expl3",
+        "scopeName": "text.tex.latex.expl3",
+        "path": "./syntax/LaTeX-Expl3.tmLanguage.json"
+      },
+      {
+        "scopeName": "markdown.latex.codeblock",
+        "path": "./syntax/latexblock.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.latex": "latex",
+          "meta.embedded.block.bibtex": "bibtex"
+        }
+      },
+      {
+        "language": "cpp_embedded_latex",
+        "scopeName": "source.cpp.embedded.latex",
+        "path": "./syntax/cpp-grammar-bailout.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.assembly.cpp": "asm"
+        }
+      },
+      {
+        "language": "jlweave",
+        "scopeName": "text.tex.latex.jlweave",
+        "path": "./syntax/JLweave.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.julia": "julia"
+        }
+      },
+      {
+        "language": "rsweave",
+        "scopeName": "text.tex.latex.rsweave",
+        "path": "./syntax/RSweave.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.r": "r"
+        }
+      }
+    ],
+    "snippets": [
+      {
+        "language": "latex",
+        "path": "./snippets/latex.json"
+      },
+      {
+        "language": "jlweave",
+        "path": "./snippets/latex.json"
+      },
+      {
+        "language": "rsweave",
+        "path": "./snippets/latex.json"
+      },
+      {
+        "language": "latex-expl3",
+        "path": "./snippets/latex.json"
+      }
+    ],
+    "capabilities": {
+      "documentFormattingProvider": "true",
+      "untrustedWorkspaces": {
+        "supported": true
+      }
+    },
+    "configuration": {
+      "title": "LaTeX",
+      "properties": {
+        "latex.columnLimit": {
+          "type": "number",
+          "default": 80,
+          "markdownDescription": "Column limit for a given line.\n\nA column limit of `0` means that there is no column limit."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "yarn run copy && webpack --mode production --devtool hidden-source-map",
+    "test-compile": "tsc -p ./",
+    "test-watch": "tsc -watch -p ./",
+    "pretest": "yarn run test-compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "copy": "cp -R third_party/LaTeX-Workshop/snippets . && cp -R third_party/LaTeX-Workshop/syntax ."
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.58.1",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.32.0",
+    "glob": "^7.1.7",
+    "mocha": "^9.0.3",
+    "ts-loader": "^9.2.4",
+    "typescript": "^4.3.5",
+    "vscode-test": "^1.6.1",
+    "webpack": "^5.47.1",
+    "webpack-cli": "^4.7.2"
+  },
+  "dependencies": {
+    "vsce": "^1.96.1"
+  }
+}
