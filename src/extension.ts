@@ -16,7 +16,7 @@ import {spawnSync} from 'child_process';
 import {existsSync} from 'fs';
 import {opendir} from 'fs/promises';
 import {platform} from 'os';
-import {dirname, join, parse} from 'path';
+import {dirname, isAbsolute, join, parse} from 'path';
 import {DocumentFormattingEditProvider, ExtensionContext, FormattingOptions, languages as Languages, Range, TextDocument, TextEdit, window, workspace as Workspace} from 'vscode';
 
 const MAX_RANGE = new Range(0, 0, Number.MAX_VALUE, Number.MAX_VALUE);
@@ -66,11 +66,18 @@ class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
 
     let configFilePath =
         Workspace.getConfiguration('latex').get<string>('formatterConfig');
-    if (!configFilePath) {
+    if (configFilePath) {
+      if (!isAbsolute(configFilePath)) {
+        const workspaceFolder = Workspace.getWorkspaceFolder(document.uri);
+        configFilePath = workspaceFolder ?
+            join(workspaceFolder.uri.fsPath, configFilePath) :
+            join(dirname(document.uri.fsPath), configFilePath)
+      }
+    } else {
       configFilePath = await this.findFormatterConfigPath(document);
     }
 
-    const {formattedText, errorMsg} = await this.execFormatter(
+    const {formattedText, errorMsg} = this.execFormatter(
         formatterCmd, document.getText(), options, configFilePath);
     if (errorMsg) {
       window.showErrorMessage(errorMsg);

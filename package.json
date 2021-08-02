@@ -2,7 +2,7 @@
   "name": "vscode-latex",
   "displayName": "LaTeX",
   "description": "LaTeX language support for Visual Studio Code.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.58.1"
   },
@@ -241,7 +241,7 @@
         "latex.formatterConfig": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Absolute path to the configuration file for the formatter. Must end in `.yaml`. Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found."
+          "markdownDescription": "Absolute/relative path to the configuration file for the formatter. Must end in `.yaml`. Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found."
         }
       }
     }
