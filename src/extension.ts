@@ -13,14 +13,21 @@
 // limitations under the License.
 
 import {spawnSync} from 'child_process';
+import {existsSync} from 'fs';
+import {opendir} from 'fs/promises';
 import {platform} from 'os';
-import {DocumentFormattingEditProvider, ExtensionContext, FormattingOptions, languages as Languages, Range, TextDocument, TextEdit, window, workspace as Workspace,} from 'vscode';
+import {dirname, join, parse} from 'path';
+import {DocumentFormattingEditProvider, ExtensionContext, FormattingOptions, languages as Languages, Range, TextDocument, TextEdit, window, workspace as Workspace} from 'vscode';
 
 const MAX_RANGE = new Range(0, 0, Number.MAX_VALUE, Number.MAX_VALUE);
 const LATEX_MODE = {
   scheme: 'file',
   language: 'latex'
 };
+const POSSIBLE_CONFIG_NAMES = [
+  'localSettings.yaml', 'latexindent.yaml', '.localSettings.yaml',
+  '.latexindent.yaml', /** '.localSettings', '.latexindent' */
+];
 
 export function activate(context: ExtensionContext) {
   if (Workspace.isTrusted) {
@@ -32,6 +39,8 @@ export function activate(context: ExtensionContext) {
 export function deactivate() {}
 
 class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
+  private _cache: { configFilePath?: string } = {}
+
   public async provideDocumentFormattingEdits(
       document: TextDocument, options: FormattingOptions): Promise<TextEdit[]> {
     let formatterName = 'latexindent';
@@ -55,8 +64,14 @@ class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       return [];
     }
 
-    const {formattedText, errorMsg} =
-        await this.execFormatter(formatterCmd, document.getText(), options);
+    let configFilePath =
+        Workspace.getConfiguration('latex').get<string>('formatterConfig');
+    if (!configFilePath) {
+      configFilePath = await this.findFormatterConfigPath(document);
+    }
+
+    const {formattedText, errorMsg} = await this.execFormatter(
+        formatterCmd, document.getText(), options, configFilePath);
     if (errorMsg) {
       window.showErrorMessage(errorMsg);
       return [];
@@ -69,31 +84,75 @@ class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
   }
 
   private execFormatter(
-      formatterCmd: string, text: string, options: FormattingOptions) {
-    const indentOptions = {
-      defaultIndent: Array(options.insertSpaces ? options.tabSize : 1)
-                         .fill(options.insertSpaces ? ' ' : '\t')
-                         .join(''),
-      textWrapOptions: {
-        columns: Workspace.getConfiguration('latex').get<number>('columnLimit'),
-      },
-    };
-
-    const {stdout: formattedText, stderr: errorMsg} = spawnSync(
-        formatterCmd,
-        [
-          '-m',
+      formatterCmd: string, text: string, options: FormattingOptions,
+      configFilePath?: string) {
+    const args = ['-g', '/dev/null', '-m'];
+    if (configFilePath) {
+      args.push('-l', configFilePath);
+    } else {
+      const indentOptions = {
+        defaultIndent: Array(options.insertSpaces ? options.tabSize : 1)
+                           .fill(options.insertSpaces ? ' ' : '\t')
+                           .join(''),
+        textWrapOptions: {
+          columns:
+              Workspace.getConfiguration('latex').get<number>('columnLimit'),
+        },
+      };
+      args.push(
           '-y',
           `defaultIndent:'${indentOptions.defaultIndent}',` +
               `modifyLineBreaks:textWrapOptions:columns:${
-                  indentOptions.textWrapOptions.columns}`,
-          '-g',
-          '/dev/null',
-          '-',
-        ],
-        {encoding: 'utf-8', input: text});
+                  indentOptions.textWrapOptions.columns}`);
+    }
+    args.push('-');
+
+    const {stdout: formattedText, stderr: errorMsg} =
+        spawnSync(formatterCmd, args, {encoding: 'utf-8', input: text});
 
     return {formattedText, errorMsg};
+  }
+
+  private async resolveFormatterConfigPath(dir: string) {
+    let currDir;
+    let currConfigNameIndex;
+    let currConfigPath;
+    for (let currParsedPath = parse(join(dir, 'not_real_file')), i = 0;
+         currParsedPath.root !== currParsedPath.dir || i > 100;
+         currParsedPath = parse(currParsedPath.dir), i++) {
+      currDir = await opendir(currParsedPath.dir);
+      for await (const dirent of currDir) {
+        if (dirent.isFile()) {
+          const idx = POSSIBLE_CONFIG_NAMES.indexOf(dirent.name)
+          if (idx > -1 &&
+              idx < (currConfigNameIndex || POSSIBLE_CONFIG_NAMES.length)) {
+            currConfigNameIndex = idx;
+            currConfigPath = join(currParsedPath.dir, dirent.name);
+          }
+        }
+      }
+      if (currConfigPath) break;
+    }
+    return currConfigPath;
+  }
+
+  private async findFormatterConfigPath(document: TextDocument) {
+    if (this._cache.configFilePath) {
+      if (existsSync(this._cache.configFilePath)) {
+        return this._cache.configFilePath;
+      }
+    }
+    let configFilePath =
+        await this.resolveFormatterConfigPath(dirname(document.uri.fsPath));
+
+    // Cache the config file path. We expect the config to change priority over
+    // a 24 hour period.
+    this._cache.configFilePath = configFilePath;
+    setTimeout(() => {
+      delete this._cache.configFilePath;
+    }, 1000 * 60 * 60 * 24);
+
+    return configFilePath;
   }
 
   private findFormatter(
