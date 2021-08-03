@@ -2,7 +2,7 @@
   "name": "vscode-latex",
   "displayName": "LaTeX",
   "description": "LaTeX language support for Visual Studio Code.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.58.1"
   },
@@ -11,7 +11,8 @@
   "categories": [
     "Programming Languages",
     "Formatters",
-    "Snippets"
+    "Snippets",
+    "Linters"
   ],
   "activationEvents": [
     "onLanguage:tex",
@@ -228,7 +229,7 @@
       "documentFormattingProvider": "true",
       "untrustedWorkspaces": {
         "supported": true,
-        "description": "The extension doesn't execute code."
+        "description": "The extension and its dependencies don't parse forever."
       }
     },
     "configuration": {
