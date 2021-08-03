@@ -20,7 +20,7 @@ This extension is intended for users accustomed to the typical developer workflo
 - [latexindent.pl](https://github.com/cmhughes/latexindent.pl): A `perl` script for formatting LaTeX.
 - [ChkTeX](https://www.nongnu.org/chktex/): A LaTeX semantic checker; i.e. linter.
 
-Both come with most `TeX` distributions (look for the `latexindent` package)
+Both come with most `TeX` distributions (look for the `latexindent` and `chktex` package)
 
 ## Extension Settings
 
@@ -43,7 +43,7 @@ Both come with most `TeX` distributions (look for the `latexindent` package)
 
 ## Configuration Files
 
-> **Warning.** Since we don't parse configuration files, we don't know what options are ahead of time so we ignore all options if a configuration is found. In particular, for formatter configurations, if found, the `formatter.columnLimit` option and VS Code's tab size/"indent or spaces" options are ignored.
+> **Warning.** Since we don't parse configuration files, we don't know what options are ahead of time so we ignore all options if a configuration is found for a particular function. In particular, if a formatter configuration is found, the `formatter.columnLimit` option and VS Code's tab size/"indent or spaces" options are ignored.
 
 Configuration files are resolved through this extension rather than through the formatter/linter. The resolution algorithm is a superset of theirs.
 
@@ -64,6 +64,18 @@ In accordance with the resolution algorithm of the linter, the configuration fil
 
 1. `.chktexrc`
 2. `chktexrc`
+
+### Configuration Format
+
+#### Formatter
+
+The formatter configuration file is written in YAML. See [their documentation](https://ctan.mirrors.hoobly.com/support/latexindent/documentation/latexindent.pdf) for options.
+
+#### Linter
+
+The linter configuration file is written in their proprietary format. See [this example](https://github.com/sharelatex/chktex/blob/master/chktexrc) for inspiration.
+
+> **Warning**. If `-v` is specified in the `CmdLine` option of the linter configuration, the linter will break since `-v` overrides the extension's custom `-f` formatting for lint messages.
 
 ### Resolution Algorithm
 
@@ -87,7 +99,7 @@ For example, if `latex.*.config` is `test/someconfig.yaml`, then if a file `F` i
 - Formatting/linting large files (> your RAM) is not possible because VS Code doesn't have a streaming API. (But why would your TeX file be that large?)
 - The formatter (for some reason) only takes files ending in `.yaml`.
 - For caching, if a configuration file is suddenly lower in priority than a new configuration (according to [Configuration File Names](#configuration-file-names)), then the new configuration file may not be noticed. In this case, reload the window.
-- If `-v` is specified in the `CmdLine` option of the linter configuration, the linter will break since this overrides the extension's custom formatting.
+- If `-v` is specified in the `CmdLine` option of the linter configuration, the linter will break since `-v` overrides the extension's custom `-f` formatting for lint messages.
 
 ## Special Thanks
 

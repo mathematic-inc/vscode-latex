@@ -4,13 +4,17 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.3]
+
+- Updates `README.md`.
+
 ## [1.0.2]
 
-- Disable `\input` parsing.
+- Disables `\input` parsing.
 
 ## [1.0.1]
 
-- Update README.md
+- Updates `README.md`.
 
 ## [1.0.0]
 
@@ -25,7 +29,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.0.3]
 
-- Adds icon
+- Adds icon.
 - New display name.
 
 ## [0.0.2]
@@ -34,4 +38,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.0.1]
 
-- Initial release
+- Initial release.
