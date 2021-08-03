@@ -57,9 +57,10 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     if (config) {
       args.push('-l', config);
     }
-    
+
     args.push('-f', '%k:%n:%l:%c:%d:%m\n')
     args.push('-q')
+    args.push('-I', '0')
 
     const {stdout: output, stderr: error} = spawnSync(exec, args, {
       encoding: 'utf-8',
