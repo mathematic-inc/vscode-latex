@@ -4,11 +4,12 @@ LaTeX language support for Visual Studio Code.
 
 ## Features
 
-- Formatting with column wrapping.
-  - Works with remote and unsaved files as well.
-  - Allows custom configurations. See [Formatter Configuration](#formatter-configuration) and [Extension Settings](#extension-settings).
 - (La)TeX syntax highlighting.
+- Formatting with column wrapping.
+- Linting.
 - LaTeX snippets.
+
+Both linting and formatting work with remote and unsaved files. They can also be customized with their respective proprietary configurations. See [Configuration Files](#configuration-files) and [Extension Settings](#extension-settings).
 
 ## Purpose
 
