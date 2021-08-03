@@ -4,9 +4,12 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.2.0]
+## [1.0.0]
 
-- Allows relative `formatterConfig` options.
+- Adds linting!
+- Renames `formatterConfig` to `formatter.config`.
+- Renames `columnLimit` to `formatter.columnLimit`.
+- Allows relative `formatter.config` options.
 
 ## [0.1.0]
 
