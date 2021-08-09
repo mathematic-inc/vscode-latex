@@ -43,7 +43,7 @@ Both come with most `TeX` distributions (look for the `latexindent` and `chktex`
 
 ## Configuration Files
 
-> **Warning.** Since we don't parse configuration files, we don't know what options are ahead of time so we ignore all options if a configuration is found for a particular function. In particular, if a formatter configuration is found, the `formatter.columnLimit` option and VS Code's tab size/"indent or spaces" options are ignored.
+> **Warning.** Since we don't parse configuration files, we don't know what options exist ahead of time so we ignore all options if a configuration is found for a particular function. In particular, if a formatter configuration is found, the `formatter.columnLimit` option and VS Code's tab size/"indent or spaces" options are ignored.
 
 Configuration files are resolved through this extension rather than through the formatter/linter. The resolution algorithm is a superset of theirs.
 
