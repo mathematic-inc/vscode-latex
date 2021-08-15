@@ -54,11 +54,11 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
 
     const config = await this.#configResolver.findConfig(document);
     const {output, error} = this.execute(document, exec, options, config);
-    if (!output) return [];
     if (error) {
       await window.showErrorMessage(error);
       return [];
     }
+    if (!output) return [];
 
     return [TextEdit.replace(document.validateRange(MAX_RANGE), output)];
   }
