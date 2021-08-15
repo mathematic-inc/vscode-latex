@@ -4,6 +4,10 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.1.0]
+
+- Fix VS Code error messages not displaying.
+
 ## [1.0.3]
 
 - Updates `README.md`.

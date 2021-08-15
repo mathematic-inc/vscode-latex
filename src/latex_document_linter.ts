@@ -59,10 +59,11 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
 
     const config = await this.#configResolver.findConfig(document);
     const {output, error} = this.execute(document, exec, config);
-    if (!output) return [];
     if (error) {
       await Window.showErrorMessage(error);
+      return [];
     }
+    if (!output) return [];
 
     return this.parseLintOutput(document, output);
   }
