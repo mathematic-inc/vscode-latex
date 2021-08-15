@@ -2,6 +2,8 @@
 
 LaTeX language support for Visual Studio Code.
 
+> *IMPORTANT UPDATE* Please update to a version >= 1.2.0. This update is mandatory to use the linter.
+
 ## Features
 
 - (La)TeX syntax highlighting.
