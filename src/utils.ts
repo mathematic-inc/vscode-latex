@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
+import { X_OK } from "constants";
+import { accessSync } from "fs";
 import { workspace as Workspace } from "vscode";
 
-export const getConfig = <T>(section: string) =>
-  Workspace.getConfiguration("latex").get<T>(section);
+export function getConfig<T>(section: string) {
+  return Workspace.getConfiguration("latex").get<T>(section);
+}
+
+export function isExecutable(file: string) {
+  try {
+    accessSync(file, X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
