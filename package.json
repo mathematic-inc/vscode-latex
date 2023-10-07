@@ -245,10 +245,20 @@
           "default": 1000,
           "markdownDescription": "Duration (in ms) to delay linting during contiguous typing."
         },
+        "latex.linter.timeout": {
+          "type": "number",
+          "default": 10000,
+          "markdownDescription": "Amount of time (in ms) to wait for the linter to finish."
+        },
         "latex.linter.config": {
           "type": "string",
           "default": "",
           "markdownDescription": "Absolute/relative path to the configuration file for the linter. Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found. See the extension's description."
+        },
+        "latex.linter.path": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute/relative path to the linter executable. Default behavior is to find the system's executable if it exists."
         },
         "latex.formatter.columnLimit": {
           "type": "number",
@@ -259,6 +269,16 @@
           "type": "string",
           "default": "",
           "markdownDescription": "Absolute/relative path to the configuration file for the formatter. Must end in `.yaml`. Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found. See the extension's description."
+        },
+        "latex.formatter.path": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute/relative path to the formatter executable. Default behavior is to find the system's executable if it exists."
+        },
+        "latex.formatter.timeout": {
+          "type": "number",
+          "default": 10000,
+          "markdownDescription": "Amount of time (in ms) to wait for the formatter to finish."
         }
       }
     }

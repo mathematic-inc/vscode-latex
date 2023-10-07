@@ -16,18 +16,20 @@
 
 import { spawnSync } from "child_process";
 import { platform } from "os";
-import { normalize } from "path";
+import { isAbsolute, join, normalize } from "path";
 import {
   DocumentFormattingEditProvider,
   FormattingOptions,
   Range,
   TextDocument,
   TextEdit,
-  window,
+  window as Window,
+  workspace as Workspace,
 } from "vscode";
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
 import { getConfig } from "./utils";
+import { existsSync } from "fs";
 
 const MAX_RANGE = new Range(0, 0, Number.MAX_VALUE, Number.MAX_VALUE);
 
@@ -68,18 +70,46 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     document: TextDocument,
     options: FormattingOptions
   ): Promise<TextEdit[]> {
-    let exec = this.#executableResolver.findExecutable();
-    if (!exec) {
-      await window.showErrorMessage(
-        `${LaTeXDocumentFormatter.EXECUTABLE} could not be found.`
-      );
-      return [];
+    let exec = getConfig<string>("formatter.path");
+    if (exec) {
+      exec = normalize(exec);
+      if (!isAbsolute(exec)) {
+        let found = false;
+        for (const workspaceFolder of Workspace.workspaceFolders ?? []) {
+          exec = join(workspaceFolder.uri.fsPath, exec);
+          if (existsSync(exec)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          await Window.showErrorMessage(
+            `Specified path ${exec} could not be found in any opened workspace folder.`
+          );
+          return [];
+        }
+      } else {
+        if (!existsSync(exec)) {
+          await Window.showErrorMessage(
+            `Specified path ${exec} could not be found.`
+          );
+          return [];
+        }
+      }
+    } else {
+      exec = this.#executableResolver.findExecutable();
+      if (!exec) {
+        await Window.showErrorMessage(
+          `${LaTeXDocumentFormatter.EXECUTABLE} could not be found.`
+        );
+        return [];
+      }
     }
 
     const config = await this.#configResolver.findConfig(document);
     const { output, error } = this.execute(document, exec, options, config);
     if (error) {
-      await window.showErrorMessage(error);
+      await Window.showErrorMessage(error);
       return [];
     }
     if (!output) {
@@ -118,7 +148,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     const { stdout: output, stderr: error } = spawnSync(exec, args, {
       encoding: "utf-8",
       input: document.getText(),
-      timeout: 10000,
+      timeout: getConfig<number>("formatter.timeout"),
     });
     return { output, error };
   }
