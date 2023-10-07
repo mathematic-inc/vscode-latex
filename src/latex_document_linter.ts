@@ -16,7 +16,7 @@
 
 import { spawnSync } from "child_process";
 import { platform } from "os";
-import { isAbsolute, join, normalize } from "path";
+import { isAbsolute } from "path";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -24,12 +24,11 @@ import {
   Range,
   TextDocument,
   window as Window,
-  workspace as Workspace,
 } from "vscode";
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
 import { DocumentLintingProvider } from "./types";
-import { getConfig, isExecutable } from "./utils";
+import { getConfig } from "./utils";
 
 const enum LintMessageSeverity {
   Error = "Error",
@@ -90,7 +89,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     const config = await this.#configResolver.findConfig(document);
     const { output, error } = this.execute(document, exec, config);
     if (error) {
-      await Window.showErrorMessage(error);
+      await Window.showErrorMessage(error.message);
       return [];
     }
     if (!output) {
@@ -111,12 +110,16 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     args.push("-q");
     args.push("-I");
 
-    const { stdout: output, stderr: error } = spawnSync(exec, args, {
+    const {
+      stdout: output,
+      stderr,
+      error,
+    } = spawnSync(exec, args, {
       encoding: "utf-8",
       input: document.getText(),
       timeout: getConfig<number>("linter.timeout"),
     });
-    return { output, error };
+    return { output, error: error ?? new Error(stderr) };
   }
 
   private parseLintOutput(
