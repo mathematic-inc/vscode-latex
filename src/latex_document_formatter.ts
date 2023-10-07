@@ -16,6 +16,7 @@
 
 import { spawnSync } from "child_process";
 import { platform } from "os";
+import { normalize } from "path";
 import {
   DocumentFormattingEditProvider,
   FormattingOptions,
@@ -23,7 +24,6 @@ import {
   TextDocument,
   TextEdit,
   window,
-  workspace as Workspace,
 } from "vscode";
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
@@ -50,9 +50,17 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       LaTeXDocumentFormatter.CONFIG,
       LaTeXDocumentFormatter.CONFIG_NAMES
     );
+    let paths = new Set<string>();
+    try {
+      const { stdout } = spawnSync("kpsewhich", ["--var-value", "TEXMFDIST"], {
+        encoding: "utf-8",
+      });
+      paths.add(normalize(stdout.trim()));
+    } catch {}
     this.#executableResolver = new ExecutableResolver(
       LaTeXDocumentFormatter.EXECUTABLE,
-      platform() === "win32" ? ".exe" : ".pl"
+      new Set(platform() === "win32" ? [".exe", ".pl"] : [".pl"]),
+      paths
     );
   }
 
