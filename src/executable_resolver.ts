@@ -15,12 +15,34 @@
  */
 
 import { spawnSync } from "child_process";
-import { existsSync } from "fs";
 import { platform } from "os";
-import { join } from "path";
+import { isAbsolute, join, normalize } from "path";
+import { workspace as Workspace } from "vscode";
 import { Cache } from "./cache";
+import { isExecutable } from "./utils";
 
 export class ExecutableResolver {
+  static findExecutableInPath(path: string): string | undefined {
+    let executable = normalize(path);
+    if (!isAbsolute(executable)) {
+      let found = false;
+      for (const workspaceFolder of Workspace.workspaceFolders ?? []) {
+        executable = join(workspaceFolder.uri.fsPath, executable);
+        if (isExecutable(executable)) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        return;
+      }
+    } else {
+      if (!isExecutable(executable)) {
+        return;
+      }
+    }
+  }
+
   #cache = new Cache<{ exec?: string }>();
 
   constructor(
@@ -35,7 +57,7 @@ export class ExecutableResolver {
 
   private resolveExecutable(name: string): string | undefined {
     let exec = this.#cache.get("exec");
-    if (exec && existsSync(exec)) {
+    if (exec && isExecutable(exec)) {
       return exec;
     }
 
@@ -53,7 +75,7 @@ export class ExecutableResolver {
       const filename = `${name}${extension}`;
       for (const path of this.paths) {
         exec = join(path, filename).trim();
-        if (existsSync(exec)) {
+        if (isExecutable(exec)) {
           this.#cache.set("exec", exec);
           return exec;
         }
@@ -63,7 +85,7 @@ export class ExecutableResolver {
       });
       if (status === 0) {
         exec = stdout.trim();
-        if (exec) {
+        if (isExecutable(exec)) {
           this.#cache.set("exec", exec);
           return exec;
         }

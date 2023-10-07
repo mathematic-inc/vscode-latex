@@ -16,7 +16,7 @@
 
 import { spawnSync } from "child_process";
 import { platform } from "os";
-import { isAbsolute, join, normalize } from "path";
+import { isAbsolute, normalize } from "path";
 import {
   DocumentFormattingEditProvider,
   FormattingOptions,
@@ -24,12 +24,10 @@ import {
   TextDocument,
   TextEdit,
   window as Window,
-  workspace as Workspace,
 } from "vscode";
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
 import { getConfig } from "./utils";
-import { existsSync } from "fs";
 
 const MAX_RANGE = new Range(0, 0, Number.MAX_VALUE, Number.MAX_VALUE);
 
@@ -72,30 +70,16 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
   ): Promise<TextEdit[]> {
     let exec = getConfig<string>("formatter.path");
     if (exec) {
-      exec = normalize(exec);
-      if (!isAbsolute(exec)) {
-        let found = false;
-        for (const workspaceFolder of Workspace.workspaceFolders ?? []) {
-          exec = join(workspaceFolder.uri.fsPath, exec);
-          if (existsSync(exec)) {
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          await Window.showErrorMessage(
-            `Specified path ${exec} could not be found in any opened workspace folder.`
-          );
-          return [];
-        }
-      } else {
-        if (!existsSync(exec)) {
-          await Window.showErrorMessage(
-            `Specified path ${exec} could not be found.`
-          );
-          return [];
-        }
+      let path = ExecutableResolver.findExecutableInPath(exec);
+      if (!path) {
+        await Window.showErrorMessage(
+          `Specified path ${exec} could not be found${
+            isAbsolute(exec) ? " in any opened workspace folder" : ""
+          }.`
+        );
+        return [];
       }
+      exec = path;
     } else {
       exec = this.#executableResolver.findExecutable();
       if (!exec) {

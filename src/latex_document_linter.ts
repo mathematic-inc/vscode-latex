@@ -16,6 +16,7 @@
 
 import { spawnSync } from "child_process";
 import { platform } from "os";
+import { isAbsolute, join, normalize } from "path";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -28,9 +29,7 @@ import {
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
 import { DocumentLintingProvider } from "./types";
-import { getConfig } from "./utils";
-import { isAbsolute, join, normalize } from "path";
-import { existsSync } from "fs";
+import { getConfig, isExecutable } from "./utils";
 
 const enum LintMessageSeverity {
   Error = "Error",
@@ -68,30 +67,16 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
   ): Promise<readonly Diagnostic[]> {
     let exec = getConfig<string>("linter.path");
     if (exec) {
-      exec = normalize(exec);
-      if (!isAbsolute(exec)) {
-        let found = false;
-        for (const workspaceFolder of Workspace.workspaceFolders ?? []) {
-          exec = join(workspaceFolder.uri.fsPath, exec);
-          if (existsSync(exec)) {
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          await Window.showErrorMessage(
-            `Specified path ${exec} could not be found in any opened workspace folder.`
-          );
-          return [];
-        }
-      } else {
-        if (!existsSync(exec)) {
-          await Window.showErrorMessage(
-            `Specified path ${exec} could not be found.`
-          );
-          return [];
-        }
+      let path = ExecutableResolver.findExecutableInPath(exec);
+      if (!path) {
+        await Window.showErrorMessage(
+          `Specified path ${exec} could not be found${
+            isAbsolute(exec) ? " in any opened workspace folder" : ""
+          }.`
+        );
+        return [];
       }
+      exec = path;
     } else {
       exec = this.#executableResolver.findExecutable();
       if (!exec) {
@@ -131,7 +116,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
       input: document.getText(),
       timeout: getConfig<number>("linter.timeout"),
     });
-    return { output: output.trim(), error };
+    return { output, error };
   }
 
   private parseLintOutput(
