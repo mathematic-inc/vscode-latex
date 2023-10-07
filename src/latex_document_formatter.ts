@@ -31,6 +31,8 @@ import { getConfig } from "./utils";
 
 const MAX_RANGE = new Range(0, 0, Number.MAX_VALUE, Number.MAX_VALUE);
 
+const DEPENDENCIES = ["YAML::Tiny", "File::HomeDir", "Unicode::GCString"];
+
 export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
   private static EXECUTABLE = "latexindent";
   private static CONFIG = "linter.config";
@@ -93,7 +95,30 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     const config = await this.#configResolver.findConfig(document);
     const { output, error } = this.execute(document, exec, options, config);
     if (error) {
-      await Window.showErrorMessage(error.message);
+      if (error.message.includes("Can't locate")) {
+        if (
+          await Window.showErrorMessage(error.message, {
+            title: "Install dependencies",
+          })
+        ) {
+          for (const dependency of DEPENDENCIES) {
+            const { stdout, stderr, error, status } = spawnSync(
+              "cpanm",
+              [dependency],
+              { encoding: "utf-8", input: "yes\n" }
+            );
+            const message = ((error?.message ?? stderr) || stdout).trim();
+            if (status !== 0) {
+              await Window.showErrorMessage(
+                `Could not install ${dependency}: ${message}`
+              );
+              break;
+            }
+          }
+        }
+      } else {
+        await Window.showErrorMessage(error.message);
+      }
       return [];
     }
     if (!output) {
@@ -138,6 +163,6 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       input: document.getText(),
       timeout: getConfig<number>("formatter.timeout"),
     });
-    return { output, error: error ?? new Error(stderr) };
+    return { output, error: error ?? (stderr && new Error(stderr)) };
   }
 }
