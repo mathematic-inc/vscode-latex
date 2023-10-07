@@ -302,11 +302,11 @@
     "@typescript-eslint/parser": "^6.7.4",
     "eslint": "^8.51.0",
     "mocha": "^10.2.0",
+    "terser-webpack-plugin": "^5.3.9",
     "ts-loader": "^9.5.0",
     "typescript": "^5.2.2",
     "vscode-test": "^1.6.1",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {}
+  }
 }
