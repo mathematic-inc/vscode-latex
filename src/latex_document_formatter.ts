@@ -112,6 +112,6 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       input: document.getText(),
       timeout: 10000,
     });
-    return { output: output.trim(), error };
+    return { output, error };
   }
 }
