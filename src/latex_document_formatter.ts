@@ -16,7 +16,7 @@
 
 import { spawnSync } from "child_process";
 import { platform } from "os";
-import { isAbsolute, normalize } from "path";
+import { isAbsolute, join, normalize } from "path";
 import {
   DocumentFormattingEditProvider,
   FormattingOptions,
@@ -55,7 +55,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       const { stdout } = spawnSync("kpsewhich", ["--var-value", "TEXMFDIST"], {
         encoding: "utf-8",
       });
-      paths.add(normalize(stdout.trim()));
+      paths.add(join(normalize(stdout.trim()), "scripts", "latexindent"));
     } catch {}
     this.#executableResolver = new ExecutableResolver(
       LaTeXDocumentFormatter.EXECUTABLE,
@@ -93,7 +93,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     const config = await this.#configResolver.findConfig(document);
     const { output, error } = this.execute(document, exec, options, config);
     if (error) {
-      await Window.showErrorMessage(error);
+      await Window.showErrorMessage(error.message);
       return [];
     }
     if (!output) {
@@ -129,11 +129,15 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     }
     args.push("-");
 
-    const { stdout: output, stderr: error } = spawnSync(exec, args, {
+    const {
+      stdout: output,
+      stderr,
+      error,
+    } = spawnSync(exec, args, {
       encoding: "utf-8",
       input: document.getText(),
       timeout: getConfig<number>("formatter.timeout"),
     });
-    return { output, error };
+    return { output, error: error ?? new Error(stderr) };
   }
 }
