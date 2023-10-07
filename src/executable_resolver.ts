@@ -71,7 +71,7 @@ export class ExecutableResolver {
         break;
     }
 
-    for (const extension of ["", ...this.extensions]) {
+    for (const extension of [...this.extensions, ""]) {
       const filename = `${name}${extension}`;
       for (const path of this.paths) {
         exec = join(path, filename).trim();
