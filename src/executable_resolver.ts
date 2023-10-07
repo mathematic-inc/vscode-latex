@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {spawnSync} from 'child_process';
-import {existsSync} from 'fs';
-import {platform} from 'os';
-import {Cache} from './cache';
+import { spawnSync } from "child_process";
+import { existsSync } from "fs";
+import { platform } from "os";
+import { Cache } from "./cache";
 
 export class ExecutableResolver {
-  #cache = new Cache<{exec?: string;}>();
+  #cache = new Cache<{ exec?: string }>();
 
   constructor(private readonly name: string, private readonly ext: string) {}
 
@@ -29,25 +29,27 @@ export class ExecutableResolver {
   }
 
   private resolveExecutable(name: string, ext: string): string {
-    let exec = this.#cache.get('exec');
-    if (exec && existsSync(exec)) return exec;
+    let exec = this.#cache.get("exec");
+    if (exec && existsSync(exec)) {
+      return exec;
+    }
 
     let which: string;
     switch (platform()) {
-      case 'win32':
-        which = 'where';
+      case "win32":
+        which = "where";
         break;
       default:
-        which = 'which';
+        which = "which";
         break;
     }
 
-    exec = spawnSync(which, [name], {encoding: 'utf-8'}).stdout;
+    exec = spawnSync(which, [name], { encoding: "utf-8" }).stdout;
     if (exec || !ext) {
-      this.#cache.set('exec', exec);
+      this.#cache.set("exec", exec);
       return exec.trim();
     }
 
-    return this.resolveExecutable(name + ext, '');
+    return this.resolveExecutable(name + ext, "");
   }
 }

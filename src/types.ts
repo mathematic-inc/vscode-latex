@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Diagnostic, TextDocument} from 'vscode';
+import { Diagnostic, TextDocument } from "vscode";
 
 export interface DocumentLintingProvider {
-  provideDocumentLintingDiagnostics(document: TextDocument):
-      Promise<readonly Diagnostic[]>;
+  provideDocumentLintingDiagnostics(
+    document: TextDocument
+  ): Promise<readonly Diagnostic[]>;
 }
