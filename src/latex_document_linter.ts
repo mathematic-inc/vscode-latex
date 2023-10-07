@@ -119,7 +119,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
       input: document.getText(),
       timeout: getConfig<number>("linter.timeout"),
     });
-    return { output, error: error ?? new Error(stderr) };
+    return { output, error: error ?? (stderr && new Error(stderr)) };
   }
 
   private parseLintOutput(
