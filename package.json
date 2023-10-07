@@ -303,7 +303,6 @@
     "@vscode/test-electron": "^2.3.5",
     "eslint": "^8.51.0",
     "mocha": "^10.2.0",
-    "terser-webpack-plugin": "^5.3.9",
     "ts-loader": "^9.5.0",
     "typescript": "^5.2.2",
     "webpack": "^5.88.2",
