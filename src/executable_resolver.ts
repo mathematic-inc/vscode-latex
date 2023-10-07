@@ -17,18 +17,23 @@
 import { spawnSync } from "child_process";
 import { existsSync } from "fs";
 import { platform } from "os";
+import { join } from "path";
 import { Cache } from "./cache";
 
 export class ExecutableResolver {
   #cache = new Cache<{ exec?: string }>();
 
-  constructor(private readonly name: string, private readonly ext: string) {}
+  constructor(
+    private readonly name: string,
+    private readonly extensions: Set<string>,
+    private readonly paths: Set<string> = new Set()
+  ) {}
 
   public findExecutable() {
-    return this.resolveExecutable(this.name, this.ext);
+    return this.resolveExecutable(this.name);
   }
 
-  private resolveExecutable(name: string, ext: string): string {
+  private resolveExecutable(name: string): string | undefined {
     let exec = this.#cache.get("exec");
     if (exec && existsSync(exec)) {
       return exec;
@@ -44,12 +49,27 @@ export class ExecutableResolver {
         break;
     }
 
-    exec = spawnSync(which, [name], { encoding: "utf-8" }).stdout;
-    if (exec || !ext) {
-      this.#cache.set("exec", exec);
-      return exec.trim();
+    for (const extension of ["", ...this.extensions]) {
+      const filename = `${name}${extension}`;
+      for (const path of this.paths) {
+        exec = join(path, filename).trim();
+        if (existsSync(exec)) {
+          this.#cache.set("exec", exec);
+          return exec;
+        }
+      }
+      const { status, stdout } = spawnSync(which, [filename], {
+        encoding: "utf-8",
+      });
+      if (status === 0) {
+        exec = stdout.trim();
+        if (exec) {
+          this.#cache.set("exec", exec);
+          return exec;
+        }
+      }
     }
 
-    return this.resolveExecutable(name + ext, "");
+    return;
   }
 }

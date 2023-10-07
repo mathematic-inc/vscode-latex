@@ -55,7 +55,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     );
     this.#executableResolver = new ExecutableResolver(
       LaTeXDocumentLinter.EXECUTABLE,
-      platform() === "win32" ? ".exe" : ""
+      new Set(platform() === "win32" ? [".exe"] : [])
     );
   }
 
@@ -76,7 +76,9 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
       await Window.showErrorMessage(error);
       return [];
     }
-    if (!output) {return [];}
+    if (!output) {
+      return [];
+    }
 
     return this.parseLintOutput(document, output);
   }
