@@ -14,56 +14,69 @@
  * limitations under the License.
  */
 
-import {spawnSync} from 'child_process';
-import {platform} from 'os';
-import {Diagnostic, DiagnosticSeverity, Position, Range, TextDocument, window as Window} from 'vscode';
-import {ConfigResolver} from './config_resolver';
-import {ExecutableResolver} from './executable_resolver';
-import {DocumentLintingProvider} from './types';
+import { spawnSync } from "child_process";
+import { platform } from "os";
+import {
+  Diagnostic,
+  DiagnosticSeverity,
+  Position,
+  Range,
+  TextDocument,
+  window as Window,
+} from "vscode";
+import { ConfigResolver } from "./config_resolver";
+import { ExecutableResolver } from "./executable_resolver";
+import { DocumentLintingProvider } from "./types";
 
 const enum LintMessageSeverity {
-  Error = 'Error',
-  Warning = 'Warning',
-  Info = 'Message'
+  Error = "Error",
+  Warning = "Warning",
+  Info = "Message",
 }
 
 const LintMessageSeverityToDiagnosticSeverity = {
   [LintMessageSeverity.Error]: DiagnosticSeverity.Error,
   [LintMessageSeverity.Warning]: DiagnosticSeverity.Warning,
-  [LintMessageSeverity.Info]: DiagnosticSeverity.Information
-}
+  [LintMessageSeverity.Info]: DiagnosticSeverity.Information,
+};
 
 export class LaTeXDocumentLinter implements DocumentLintingProvider {
-  private static EXECUTABLE = 'chktex';
-  private static CONFIG = 'linter.config';
-  private static CONFIG_NAMES = ['.chktexrc', 'chktexrc'];
+  private static EXECUTABLE = "chktex";
+  private static CONFIG = "linter.config";
+  private static CONFIG_NAMES = [".chktexrc", "chktexrc"];
 
   #configResolver: ConfigResolver;
   #executableResolver: ExecutableResolver;
 
   constructor() {
     this.#configResolver = new ConfigResolver(
-        LaTeXDocumentLinter.CONFIG, LaTeXDocumentLinter.CONFIG_NAMES);
+      LaTeXDocumentLinter.CONFIG,
+      LaTeXDocumentLinter.CONFIG_NAMES
+    );
     this.#executableResolver = new ExecutableResolver(
-        LaTeXDocumentLinter.EXECUTABLE, platform() === 'win32' ? '.exe' : '');
+      LaTeXDocumentLinter.EXECUTABLE,
+      platform() === "win32" ? ".exe" : ""
+    );
   }
 
-  public async provideDocumentLintingDiagnostics(document: TextDocument):
-      Promise<readonly Diagnostic[]> {
+  public async provideDocumentLintingDiagnostics(
+    document: TextDocument
+  ): Promise<readonly Diagnostic[]> {
     const exec = this.#executableResolver.findExecutable();
     if (!exec) {
       await Window.showErrorMessage(
-          `${LaTeXDocumentLinter.EXECUTABLE} could not be found.`);
+        `${LaTeXDocumentLinter.EXECUTABLE} could not be found.`
+      );
       return [];
     }
 
     const config = await this.#configResolver.findConfig(document);
-    const {output, error} = this.execute(document, exec, config);
+    const { output, error } = this.execute(document, exec, config);
     if (error) {
       await Window.showErrorMessage(error);
       return [];
     }
-    if (!output) return [];
+    if (!output) {return [];}
 
     return this.parseLintOutput(document, output);
   }
@@ -72,34 +85,42 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     const args = [];
 
     if (config) {
-      args.push('-l', config);
+      args.push("-l", config);
     }
 
-    args.push('-f', '%k:%n:%l:%c:%d:%m\n')
-    args.push('-q')
-    args.push('-I')
+    args.push("-f", "%k:%n:%l:%c:%d:%m\n");
+    args.push("-q");
+    args.push("-I");
 
-    const {stdout: output, stderr: error} = spawnSync(exec, args, {
-      encoding: 'utf-8',
+    const { stdout: output, stderr: error } = spawnSync(exec, args, {
+      encoding: "utf-8",
       input: document.getText(),
       timeout: 10000,
     });
-    return {output: output.trim(), error};
+    return { output: output.trim(), error };
   }
 
-  private parseLintOutput(document: TextDocument, output: string):
-      Diagnostic[] {
+  private parseLintOutput(
+    document: TextDocument,
+    output: string
+  ): Diagnostic[] {
     const diagnostics: Diagnostic[] = [];
-    for (const lintEntry of output.trim().split('\n')) {
-      const [severity, code, line, column, length, message] =
-          lintEntry.split(':', 6);
+    for (const lintEntry of output.trim().split("\n")) {
+      const [severity, code, line, column, length, message] = lintEntry.split(
+        ":",
+        6
+      );
       const start = new Position(+line - 1, +column - 1);
-      const end = document.positionAt(document.offsetAt(start) + +length)
-      diagnostics.push(new Diagnostic(
+      const end = document.positionAt(document.offsetAt(start) + +length);
+      diagnostics.push(
+        new Diagnostic(
           new Range(start, end),
           `[${LaTeXDocumentLinter.EXECUTABLE}] ${code}: ${message}`,
-          LintMessageSeverityToDiagnosticSeverity
-              [severity as LintMessageSeverity]));
+          LintMessageSeverityToDiagnosticSeverity[
+            severity as LintMessageSeverity
+          ]
+        )
+      );
     }
     return diagnostics;
   }

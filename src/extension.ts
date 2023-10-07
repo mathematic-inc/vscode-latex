@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-import {ExtensionContext, languages as Languages} from 'vscode';
-import {LaTeXDocumentFormatter} from './latex_document_formatter';
-import {LaTeXDocumentLinter} from './latex_document_linter';
-import {registerDocumentLintingProvider} from './register_document_linting_provider';
+import { ExtensionContext, languages as Languages } from "vscode";
+import { LaTeXDocumentFormatter } from "./latex_document_formatter";
+import { LaTeXDocumentLinter } from "./latex_document_linter";
+import { registerDocumentLintingProvider } from "./register_document_linting_provider";
 
 const LATEX_MODE = {
-  scheme: 'file',
-  language: 'latex'
+  scheme: "file",
+  language: "latex",
 };
 
 export function activate(context: ExtensionContext) {
-  context.subscriptions.push(Languages.registerDocumentFormattingEditProvider(
-      LATEX_MODE, new LaTeXDocumentFormatter()));
   context.subscriptions.push(
-      registerDocumentLintingProvider(LATEX_MODE, [new LaTeXDocumentLinter()]));
+    Languages.registerDocumentFormattingEditProvider(
+      LATEX_MODE,
+      new LaTeXDocumentFormatter()
+    )
+  );
+  context.subscriptions.push(
+    registerDocumentLintingProvider(LATEX_MODE, [new LaTeXDocumentLinter()])
+  );
 }
 
 export function deactivate() {}

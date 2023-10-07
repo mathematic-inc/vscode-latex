@@ -22,7 +22,7 @@ export class Cache<T> {
     this.#storage[name] = value;
 
     const timer = this.#timers[name];
-    if (timer) clearTimeout(timer);
+    if (timer) {clearTimeout(timer);}
 
     this.#timers[name] = setTimeout(() => {
       delete this.#storage[name];
@@ -32,7 +32,7 @@ export class Cache<T> {
   unset<K extends keyof T>(name: K) {
     delete this.#storage[name];
     const timer = this.#timers[name];
-    if (timer) clearTimeout(timer);
+    if (timer) {clearTimeout(timer);}
   }
 
   get<K extends keyof T>(name: K): T[K]|undefined {
