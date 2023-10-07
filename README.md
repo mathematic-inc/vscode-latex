@@ -2,8 +2,6 @@
 
 LaTeX language support for Visual Studio Code.
 
-> *IMPORTANT UPDATE* Please update to a version >= 1.2.0. This update is mandatory to use the linter.
-
 ## Features
 
 - (La)TeX syntax highlighting.
@@ -20,6 +18,9 @@ This extension is intended for users accustomed to the typical developer workflo
 ## Requirements
 
 - [latexindent.pl](https://github.com/cmhughes/latexindent.pl): A `perl` script for formatting LaTeX.
+ - You will also need to install some Perl dependencies. Just install
+   [`cpanm`](https://metacpan.org/dist/App-cpanminus/view/bin/cpanm) and you
+   will be prompted in your first format to install dependencies.
 - [ChkTeX](https://www.nongnu.org/chktex/): A LaTeX semantic checker; i.e. linter.
 
 Both come with most `TeX` distributions (look for the `latexindent` and `chktex` package)
@@ -32,16 +33,26 @@ Both come with most `TeX` distributions (look for the `latexindent` and `chktex`
   - Default is `true`.
 - `latex.linter.delay`: Duration (in ms) to delay linting during contiguous typing.
   - Default is `1000`.
+- `latex.linter.timeout`: Amount of time (in ms) to wait for the linter to
+  finish.
+  - Default is `10000`.
 - `latex.linter.config`: Absolute (or relative; see [Resolution Algorithm](#resolution-algorithm)) path to the configuration file for the linter.
   - Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found. See [Resolution Algorithm](#resolution-algorithm).
+- `latex.linter.path`: Absolute/relative path to the linter executable.
+  - Default behavior is to find the system's executable if it exists.
 
 ### Formatter
 
 - `latex.formatter.columnLimit`: Sets the column limit for a given line. A column limit of `0` means that there is no column limit.
   - Default is `80`.
   - This is ignored if a configuration file is found in some parent of the file.
+- `latex.formatter.timeout`: Amount of time (in ms) to wait for the formatter to
+  finish.
+  - Default is `10000`.
 - `latex.formatter.config`: Absolute (or relative; see [Resolution Algorithm](#resolution-algorithm)) path to the configuration file for the formatter. Must end in `.yaml`.
   - Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found. See [Resolution Algorithm](#resolution-algorithm).
+- `latex.formatter.path`: Absolute/relative path to the formatter executable.
+  - Default behavior is to find the system's executable if it exists.
 
 ## Configuration Files
 
