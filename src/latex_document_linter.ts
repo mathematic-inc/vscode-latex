@@ -23,10 +23,14 @@ import {
   Range,
   TextDocument,
   window as Window,
+  workspace as Workspace,
 } from "vscode";
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
 import { DocumentLintingProvider } from "./types";
+import { getConfig } from "./utils";
+import { isAbsolute, join, normalize } from "path";
+import { existsSync } from "fs";
 
 const enum LintMessageSeverity {
   Error = "Error",
@@ -62,12 +66,40 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
   public async provideDocumentLintingDiagnostics(
     document: TextDocument
   ): Promise<readonly Diagnostic[]> {
-    const exec = this.#executableResolver.findExecutable();
-    if (!exec) {
-      await Window.showErrorMessage(
-        `${LaTeXDocumentLinter.EXECUTABLE} could not be found.`
-      );
-      return [];
+    let exec = getConfig<string>("linter.path");
+    if (exec) {
+      exec = normalize(exec);
+      if (!isAbsolute(exec)) {
+        let found = false;
+        for (const workspaceFolder of Workspace.workspaceFolders ?? []) {
+          exec = join(workspaceFolder.uri.fsPath, exec);
+          if (existsSync(exec)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          await Window.showErrorMessage(
+            `Specified path ${exec} could not be found in any opened workspace folder.`
+          );
+          return [];
+        }
+      } else {
+        if (!existsSync(exec)) {
+          await Window.showErrorMessage(
+            `Specified path ${exec} could not be found.`
+          );
+          return [];
+        }
+      }
+    } else {
+      exec = this.#executableResolver.findExecutable();
+      if (!exec) {
+        await Window.showErrorMessage(
+          `${LaTeXDocumentLinter.EXECUTABLE} could not be found.`
+        );
+        return [];
+      }
     }
 
     const config = await this.#configResolver.findConfig(document);
@@ -97,7 +129,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     const { stdout: output, stderr: error } = spawnSync(exec, args, {
       encoding: "utf-8",
       input: document.getText(),
-      timeout: 10000,
+      timeout: getConfig<number>("linter.timeout"),
     });
     return { output: output.trim(), error };
   }
