@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Mathematic, Inc.
+ * Copyright 2021 Mathematic Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { spawnSync } from "child_process";
-import { platform } from "os";
-import { isAbsolute, join, normalize } from "path";
+import { spawnSync } from "node:child_process";
+import { platform } from "node:os";
+import { isAbsolute, join, normalize } from "node:path";
 import {
-  DocumentFormattingEditProvider,
-  FormattingOptions,
+  type DocumentFormattingEditProvider,
+  type FormattingOptions,
   Range,
-  TextDocument,
+  type TextDocument,
   TextEdit,
   window as Window,
 } from "vscode";
@@ -44,21 +44,23 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     /** '.localSettings', '.latexindent' */
   ];
 
-  #configResolver: ConfigResolver;
-  #executableResolver: ExecutableResolver;
+  readonly #configResolver: ConfigResolver;
+  readonly #executableResolver: ExecutableResolver;
 
   constructor() {
     this.#configResolver = new ConfigResolver(
       LaTeXDocumentFormatter.CONFIG,
       LaTeXDocumentFormatter.CONFIG_NAMES
     );
-    let paths = new Set<string>();
+    const paths = new Set<string>();
     try {
       const { stdout } = spawnSync("kpsewhich", ["--var-value", "TEXMFDIST"], {
         encoding: "utf-8",
       });
       paths.add(join(normalize(stdout.trim()), "scripts", "latexindent"));
-    } catch {}
+    } catch {
+      // kpsewhich not available; skip adding the path
+    }
     this.#executableResolver = new ExecutableResolver(
       LaTeXDocumentFormatter.EXECUTABLE,
       new Set(platform() === "win32" ? [".exe", ".pl"] : [".pl"]),
@@ -66,13 +68,13 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     );
   }
 
-  public async provideDocumentFormattingEdits(
+  async provideDocumentFormattingEdits(
     document: TextDocument,
     options: FormattingOptions
   ): Promise<TextEdit[]> {
     let exec = getConfig<string>("formatter.path");
     if (exec) {
-      let path = ExecutableResolver.findExecutableInPath(exec);
+      const path = ExecutableResolver.findExecutableInPath(exec);
       if (!path) {
         await Window.showErrorMessage(
           `Specified path ${exec} could not be found${
@@ -139,7 +141,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       args.push("-l", configFilePath);
     } else {
       const indentOptions = {
-        defaultIndent: Array(options.insertSpaces ? options.tabSize : 1)
+        defaultIndent: new Array(options.insertSpaces ? options.tabSize : 1)
           .fill(options.insertSpaces ? " " : "\t")
           .join(""),
         textWrapOptions: {

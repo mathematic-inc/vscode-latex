@@ -1,9 +1,7 @@
 {
   "name": "BibTeX Style",
   "scopeName": "source.bst",
-  "fileTypes": [
-    "bst"
-  ],
+  "fileTypes": ["bst"],
   "patterns": [
     {
       "include": "#comments"
