@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Mathematic, Inc.
+ * Copyright 2021 Mathematic Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-import { spawnSync } from "child_process";
-import { platform } from "os";
-import { isAbsolute } from "path";
+import { spawnSync } from "node:child_process";
+import { platform } from "node:os";
+import { isAbsolute } from "node:path";
 import {
   Diagnostic,
   DiagnosticSeverity,
   Position,
   Range,
-  TextDocument,
+  type TextDocument,
   window as Window,
 } from "vscode";
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
-import { DocumentLintingProvider } from "./types";
+import type { DocumentLintingProvider } from "./types";
 import { getConfig } from "./utils";
 
-const enum LintMessageSeverity {
-  Error = "Error",
-  Warning = "Warning",
-  Info = "Message",
-}
+const LintMessageSeverity = {
+  Error: "Error",
+  Warning: "Warning",
+  Info: "Message",
+} as const;
 
-const LintMessageSeverityToDiagnosticSeverity = {
+type LintMessageSeverity =
+  (typeof LintMessageSeverity)[keyof typeof LintMessageSeverity];
+
+const LintMessageSeverityToDiagnosticSeverity: Record<
+  LintMessageSeverity,
+  DiagnosticSeverity
+> = {
   [LintMessageSeverity.Error]: DiagnosticSeverity.Error,
   [LintMessageSeverity.Warning]: DiagnosticSeverity.Warning,
   [LintMessageSeverity.Info]: DiagnosticSeverity.Information,
@@ -47,8 +53,8 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
   private static CONFIG = "linter.config";
   private static CONFIG_NAMES = [".chktexrc", "chktexrc"];
 
-  #configResolver: ConfigResolver;
-  #executableResolver: ExecutableResolver;
+  readonly #configResolver: ConfigResolver;
+  readonly #executableResolver: ExecutableResolver;
 
   constructor() {
     this.#configResolver = new ConfigResolver(
@@ -61,12 +67,12 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     );
   }
 
-  public async provideDocumentLintingDiagnostics(
+  async provideDocumentLintingDiagnostics(
     document: TextDocument
   ): Promise<readonly Diagnostic[]> {
     let exec = getConfig<string>("linter.path");
     if (exec) {
-      let path = ExecutableResolver.findExecutableInPath(exec);
+      const path = ExecutableResolver.findExecutableInPath(exec);
       if (!path) {
         await Window.showErrorMessage(
           `Specified path ${exec} could not be found${
@@ -100,7 +106,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
   }
 
   private execute(document: TextDocument, exec: string, config?: string) {
-    const args = [];
+    const args: string[] = [];
 
     if (config) {
       args.push("-l", config);

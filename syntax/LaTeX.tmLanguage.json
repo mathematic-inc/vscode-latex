@@ -1,7 +1,5 @@
 {
-  "fileTypes": [
-    "tex"
-  ],
+  "fileTypes": ["tex"],
   "firstLineMatch": "^\\\\documentclass(\\[.*\\])?\\{.*\\}",
   "keyEquivalent": "^~L",
   "name": "LaTeX",
@@ -1770,7 +1768,7 @@
           "name": "punctuation.definition.arguments.optional.begin.latex"
         },
         "7": {
-          "patterns":[
+          "patterns": [
             {
               "include": "$base"
             }
