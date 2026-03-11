@@ -4,6 +4,17 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.0.0](https://github.com/mathematic-inc/vscode-latex/compare/v1.3.0...v2.0.0) (2026-03-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate toolchain from webpack/yarn/ESLint to tsup/pnpm/Biome ([#1](https://github.com/mathematic-inc/vscode-latex/issues/1))
+
+### Features
+
+* Migrate toolchain from webpack/yarn/ESLint to tsup/pnpm/Biome ([#1](https://github.com/mathematic-inc/vscode-latex/issues/1)) ([b36777d](https://github.com/mathematic-inc/vscode-latex/commit/b36777dbee231cddc7b43796c374d25074a89c48))
+
 ## [1.2.0]
 
 - Fix broken `chktex` configuration.
