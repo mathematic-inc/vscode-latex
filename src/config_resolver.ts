@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Mathematic, Inc.
+ * Copyright 2021 Mathematic Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import { existsSync } from "fs";
-import { opendir } from "fs/promises";
-import { dirname, isAbsolute, join, parse } from "path";
-import { TextDocument, workspace as Workspace } from "vscode";
+import { existsSync } from "node:fs";
+import { opendir } from "node:fs/promises";
+import { dirname, isAbsolute, join, parse } from "node:path";
+import { type TextDocument, workspace as Workspace } from "vscode";
 import { Cache } from "./cache";
 import { getConfig } from "./utils";
 
 export class ConfigResolver {
-  #cache = new Cache<{ config?: string }>();
+  readonly #cache = new Cache<{ config?: string }>();
+  readonly #configKey: string;
+  readonly #possibleNames: string[];
 
-  constructor(
-    private readonly configKey: string,
-    private readonly possibleNames: string[]
-  ) {}
+  constructor(configKey: string, possibleNames: string[]) {
+    this.#configKey = configKey;
+    this.#possibleNames = possibleNames;
+  }
 
-  public async findConfig(document: TextDocument) {
-    let config = getConfig<string>(this.configKey);
+  async findConfig(document: TextDocument) {
+    const config = getConfig<string>(this.#configKey);
     if (!config) {
       return await this.resolveConfig(document);
     }
@@ -49,8 +51,8 @@ export class ConfigResolver {
       return config;
     }
 
-    let currDir;
-    let currIndex;
+    let currDir: Awaited<ReturnType<typeof opendir>> | undefined;
+    let currIndex: number | undefined;
     for (
       let currParsedPath = parse(document.uri.fsPath), i = 0;
       currParsedPath.root !== currParsedPath.dir || i > 100;
@@ -59,8 +61,8 @@ export class ConfigResolver {
       currDir = await opendir(currParsedPath.dir);
       for await (const dirent of currDir) {
         if (dirent.isFile()) {
-          const idx = this.possibleNames.indexOf(dirent.name);
-          if (idx > -1 && idx < (currIndex || this.possibleNames.length)) {
+          const idx = this.#possibleNames.indexOf(dirent.name);
+          if (idx > -1 && idx < (currIndex ?? this.#possibleNames.length)) {
             currIndex = idx;
             config = join(currParsedPath.dir, dirent.name);
           }

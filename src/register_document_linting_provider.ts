@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Mathematic, Inc.
+ * Copyright 2021 Mathematic Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 
 import {
-  Disposable,
-  DocumentSelector,
+  type Diagnostic,
+  type Disposable,
+  type DocumentSelector,
   languages as Languages,
-  TextDocument,
+  type TextDocument,
   window as Window,
   workspace as Workspace,
 } from "vscode";
-import { DocumentLintingProvider } from "./types";
+import type { DocumentLintingProvider } from "./types";
 import { getConfig } from "./utils";
 
 export function registerDocumentLintingProvider(
@@ -30,7 +31,7 @@ export function registerDocumentLintingProvider(
   linters: readonly DocumentLintingProvider[]
 ) {
   const runLinters = async (document: TextDocument) => {
-    const diagnostics = [];
+    const diagnostics: Diagnostic[] = [];
     for (const linter of linters) {
       diagnostics.push(
         ...(await linter.provideDocumentLintingDiagnostics(document))
@@ -41,11 +42,19 @@ export function registerDocumentLintingProvider(
 
   let debounceTimer: NodeJS.Timeout | undefined;
   const runLintersWithDebounce = (document: TextDocument, force?: boolean) => {
-    if (!getConfig("linter.enabled")) {return;}
-    if (!Languages.match(selector, document)) {return;}
-    if (force) {return runLinters(document);}
+    if (!getConfig("linter.enabled")) {
+      return;
+    }
+    if (!Languages.match(selector, document)) {
+      return;
+    }
+    if (force) {
+      return runLinters(document);
+    }
 
-    if (debounceTimer) {clearTimeout(debounceTimer);}
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
     debounceTimer = setTimeout(
       () => runLinters(document),
       getConfig("linter.delay")
@@ -66,7 +75,9 @@ export function registerDocumentLintingProvider(
     (editor) => {
       activeEditor = editor;
       if (editor && Languages.match(selector, editor.document)) {
-        if (debounceTimer) {clearTimeout(debounceTimer);}
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
         runLintersWithDebounce(editor.document);
       }
     },
@@ -86,7 +97,9 @@ export function registerDocumentLintingProvider(
 
   return {
     dispose() {
-      disposables.forEach((d) => d.dispose());
+      for (const d of disposables) {
+        d.dispose();
+      }
     },
   };
 }
