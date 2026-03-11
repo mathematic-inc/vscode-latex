@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Mathematic, Inc.
+ * Copyright 2021 Mathematic Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { X_OK } from "constants";
-import { accessSync } from "fs";
+import { X_OK } from "node:constants";
+import { accessSync } from "node:fs";
 import { workspace as Workspace } from "vscode";
 
 export function getConfig<T>(section: string) {

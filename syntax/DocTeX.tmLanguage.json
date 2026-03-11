@@ -1,7 +1,5 @@
 {
-  "fileTypes": [
-    "dtx"
-  ],
+  "fileTypes": ["dtx"],
   "name": "DocTeX",
   "patterns": [
     {
