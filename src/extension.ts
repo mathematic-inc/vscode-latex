@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Mathematic, Inc.
+ * Copyright 2021 Mathematic Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ExtensionContext, languages as Languages } from "vscode";
+import { type ExtensionContext, languages as Languages } from "vscode";
 import { LaTeXDocumentFormatter } from "./latex_document_formatter";
 import { LaTeXDocumentLinter } from "./latex_document_linter";
 import { registerDocumentLintingProvider } from "./register_document_linting_provider";
@@ -36,4 +36,6 @@ export function activate(context: ExtensionContext) {
   );
 }
 
-export function deactivate() {}
+export function deactivate() {
+  // No cleanup needed
+}

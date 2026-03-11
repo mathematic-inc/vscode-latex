@@ -1,6 +1,14 @@
 # Visual Studio Code LaTeX
 
-LaTeX language support for Visual Studio Code.
+LaTeX language support for Visual Studio Code. Source available at [github.com/mathematic-inc/vscode-latex](https://github.com/mathematic-inc/vscode-latex).
+
+## Installation
+
+Search for **LaTeX** (publisher: `mathematic`) in the VS Code Extensions view, or install via the command line:
+
+```sh
+code --install-extension mathematic.vscode-latex
+```
 
 ## Features
 
@@ -117,3 +125,5 @@ For example, if `latex.*.config` is `test/someconfig.yaml`, then if a file `F` i
 ## Special Thanks
 
 The syntax is provided by [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop).
+
+> This project is free and open-source work by a 501(c)(3) non-profit. If you find it useful, please consider [donating](https://github.com/sponsors/mathematic-inc).

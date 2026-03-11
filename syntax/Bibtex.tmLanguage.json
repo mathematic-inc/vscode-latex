@@ -1,8 +1,6 @@
 {
   "comment": "Grammar based on description from http://artis.imag.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html#comment\n\t\n\tTODO: Does not support @preamble\n\t",
-  "fileTypes": [
-    "bib"
-  ],
+  "fileTypes": ["bib"],
   "name": "BibTeX",
   "patterns": [
     {
@@ -262,7 +260,6 @@
             }
           ]
         }
-
       ]
     }
   },

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Mathematic, Inc.
+ * Copyright 2021 Mathematic Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { spawnSync } from "child_process";
-import { platform } from "os";
-import { isAbsolute, join, normalize } from "path";
+import { spawnSync } from "node:child_process";
+import { platform } from "node:os";
+import { isAbsolute, join, normalize } from "node:path";
 import { workspace as Workspace } from "vscode";
 import { Cache } from "./cache";
 import { isExecutable } from "./utils";
@@ -24,7 +24,11 @@ import { isExecutable } from "./utils";
 export class ExecutableResolver {
   static findExecutableInPath(path: string): string | undefined {
     let executable = normalize(path);
-    if (!isAbsolute(executable)) {
+    if (isAbsolute(executable)) {
+      if (!isExecutable(executable)) {
+        return;
+      }
+    } else {
       let found = false;
       for (const workspaceFolder of Workspace.workspaceFolders ?? []) {
         executable = join(workspaceFolder.uri.fsPath, executable);
@@ -36,23 +40,26 @@ export class ExecutableResolver {
       if (!found) {
         return;
       }
-    } else {
-      if (!isExecutable(executable)) {
-        return;
-      }
     }
   }
 
-  #cache = new Cache<{ exec?: string }>();
+  readonly #cache = new Cache<{ exec?: string }>();
+  readonly #name: string;
+  readonly #extensions: Set<string>;
+  readonly #paths: Set<string>;
 
   constructor(
-    private readonly name: string,
-    private readonly extensions: Set<string>,
-    private readonly paths: Set<string> = new Set()
-  ) {}
+    name: string,
+    extensions: Set<string>,
+    paths: Set<string> = new Set()
+  ) {
+    this.#name = name;
+    this.#extensions = extensions;
+    this.#paths = paths;
+  }
 
-  public findExecutable() {
-    return this.resolveExecutable(this.name);
+  findExecutable() {
+    return this.resolveExecutable(this.#name);
   }
 
   private resolveExecutable(name: string): string | undefined {
@@ -71,9 +78,9 @@ export class ExecutableResolver {
         break;
     }
 
-    for (const extension of [...this.extensions, ""]) {
+    for (const extension of [...this.#extensions, ""]) {
       const filename = `${name}${extension}`;
-      for (const path of this.paths) {
+      for (const path of this.#paths) {
         exec = join(path, filename).trim();
         if (isExecutable(exec)) {
           this.#cache.set("exec", exec);

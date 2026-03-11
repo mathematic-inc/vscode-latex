@@ -1,11 +1,5 @@
 {
-  "fileTypes": [
-    "sty",
-    "cls",
-    "bbx",
-    "cbx",
-    "ltx"
-  ],
+  "fileTypes": ["sty", "cls", "bbx", "cbx", "ltx"],
   "name": "TeX",
   "patterns": [
     {
