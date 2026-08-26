@@ -1,0 +1,14 @@
+{
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/gen/**",
+    "**/generated/**",
+    "snippets/**",
+    "syntax/**",
+    "third_party/**"
+  ],
+  "semi": true,
+  "singleQuote": false,
+  "sortImports": true,
+  "sortPackageJson": false
+}

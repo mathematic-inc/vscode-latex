@@ -30,7 +30,7 @@ export class Cache<T> {
       () => {
         delete this.#storage[name];
       },
-      1000 * 60 * 60 * 24
+      1000 * 60 * 60 * 24,
     );
   }
 

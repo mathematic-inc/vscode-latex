@@ -17,7 +17,9 @@
 import { existsSync } from "node:fs";
 import { opendir } from "node:fs/promises";
 import { dirname, isAbsolute, join, parse } from "node:path";
+
 import { type TextDocument, workspace as Workspace } from "vscode";
+
 import { Cache } from "./cache";
 import { getConfig } from "./utils";
 

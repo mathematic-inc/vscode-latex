@@ -17,6 +17,7 @@
 import { spawnSync } from "node:child_process";
 import { platform } from "node:os";
 import { isAbsolute, join, normalize } from "node:path";
+
 import {
   type DocumentFormattingEditProvider,
   type FormattingOptions,
@@ -25,6 +26,7 @@ import {
   TextEdit,
   window as Window,
 } from "vscode";
+
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
 import { getConfig } from "./utils";
@@ -50,7 +52,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
   constructor() {
     this.#configResolver = new ConfigResolver(
       LaTeXDocumentFormatter.CONFIG,
-      LaTeXDocumentFormatter.CONFIG_NAMES
+      LaTeXDocumentFormatter.CONFIG_NAMES,
     );
     const paths = new Set<string>();
     try {
@@ -64,13 +66,13 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     this.#executableResolver = new ExecutableResolver(
       LaTeXDocumentFormatter.EXECUTABLE,
       new Set(platform() === "win32" ? [".exe", ".pl"] : [".pl"]),
-      paths
+      paths,
     );
   }
 
   async provideDocumentFormattingEdits(
     document: TextDocument,
-    options: FormattingOptions
+    options: FormattingOptions,
   ): Promise<TextEdit[]> {
     let exec = getConfig<string>("formatter.path");
     if (exec) {
@@ -79,7 +81,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
         await Window.showErrorMessage(
           `Specified path ${exec} could not be found${
             isAbsolute(exec) ? " in any opened workspace folder" : ""
-          }.`
+          }.`,
         );
         return [];
       }
@@ -87,9 +89,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     } else {
       exec = this.#executableResolver.findExecutable();
       if (!exec) {
-        await Window.showErrorMessage(
-          `${LaTeXDocumentFormatter.EXECUTABLE} could not be found.`
-        );
+        await Window.showErrorMessage(`${LaTeXDocumentFormatter.EXECUTABLE} could not be found.`);
         return [];
       }
     }
@@ -104,16 +104,13 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
           })
         ) {
           for (const dependency of DEPENDENCIES) {
-            const { stdout, stderr, error, status } = spawnSync(
-              "cpanm",
-              [dependency],
-              { encoding: "utf-8", input: "yes\n" }
-            );
+            const { stdout, stderr, error, status } = spawnSync("cpanm", [dependency], {
+              encoding: "utf-8",
+              input: "yes\n",
+            });
             const message = ((error?.message ?? stderr) || stdout).trim();
             if (status !== 0) {
-              await Window.showErrorMessage(
-                `Could not install ${dependency}: ${message}`
-              );
+              await Window.showErrorMessage(`Could not install ${dependency}: ${message}`);
               break;
             }
           }
@@ -134,14 +131,14 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
     document: TextDocument,
     exec: string,
     options: FormattingOptions,
-    configFilePath?: string
+    configFilePath?: string,
   ) {
     const args = ["-g", "/dev/null", "-m"];
     if (configFilePath) {
       args.push("-l", configFilePath);
     } else {
       const indentOptions = {
-        defaultIndent: new Array(options.insertSpaces ? options.tabSize : 1)
+        defaultIndent: Array.from({ length: options.insertSpaces ? options.tabSize : 1 })
           .fill(options.insertSpaces ? " " : "\t")
           .join(""),
         textWrapOptions: {
@@ -151,7 +148,7 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       args.push(
         "-y",
         `defaultIndent:'${indentOptions.defaultIndent}',` +
-          `modifyLineBreaks:textWrapOptions:columns:${indentOptions.textWrapOptions.columns}`
+          `modifyLineBreaks:textWrapOptions:columns:${indentOptions.textWrapOptions.columns}`,
       );
     }
     args.push("-");

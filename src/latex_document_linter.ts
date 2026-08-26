@@ -17,6 +17,7 @@
 import { spawnSync } from "node:child_process";
 import { platform } from "node:os";
 import { isAbsolute } from "node:path";
+
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -25,6 +26,7 @@ import {
   type TextDocument,
   window as Window,
 } from "vscode";
+
 import { ConfigResolver } from "./config_resolver";
 import { ExecutableResolver } from "./executable_resolver";
 import type { DocumentLintingProvider } from "./types";
@@ -36,13 +38,9 @@ const LintMessageSeverity = {
   Info: "Message",
 } as const;
 
-type LintMessageSeverity =
-  (typeof LintMessageSeverity)[keyof typeof LintMessageSeverity];
+type LintMessageSeverity = (typeof LintMessageSeverity)[keyof typeof LintMessageSeverity];
 
-const LintMessageSeverityToDiagnosticSeverity: Record<
-  LintMessageSeverity,
-  DiagnosticSeverity
-> = {
+const LintMessageSeverityToDiagnosticSeverity: Record<LintMessageSeverity, DiagnosticSeverity> = {
   [LintMessageSeverity.Error]: DiagnosticSeverity.Error,
   [LintMessageSeverity.Warning]: DiagnosticSeverity.Warning,
   [LintMessageSeverity.Info]: DiagnosticSeverity.Information,
@@ -59,17 +57,15 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
   constructor() {
     this.#configResolver = new ConfigResolver(
       LaTeXDocumentLinter.CONFIG,
-      LaTeXDocumentLinter.CONFIG_NAMES
+      LaTeXDocumentLinter.CONFIG_NAMES,
     );
     this.#executableResolver = new ExecutableResolver(
       LaTeXDocumentLinter.EXECUTABLE,
-      new Set(platform() === "win32" ? [".exe"] : [])
+      new Set(platform() === "win32" ? [".exe"] : []),
     );
   }
 
-  async provideDocumentLintingDiagnostics(
-    document: TextDocument
-  ): Promise<readonly Diagnostic[]> {
+  async provideDocumentLintingDiagnostics(document: TextDocument): Promise<readonly Diagnostic[]> {
     let exec = getConfig<string>("linter.path");
     if (exec) {
       const path = ExecutableResolver.findExecutableInPath(exec);
@@ -77,7 +73,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
         await Window.showErrorMessage(
           `Specified path ${exec} could not be found${
             isAbsolute(exec) ? " in any opened workspace folder" : ""
-          }.`
+          }.`,
         );
         return [];
       }
@@ -85,9 +81,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     } else {
       exec = this.#executableResolver.findExecutable();
       if (!exec) {
-        await Window.showErrorMessage(
-          `${LaTeXDocumentLinter.EXECUTABLE} could not be found.`
-        );
+        await Window.showErrorMessage(`${LaTeXDocumentLinter.EXECUTABLE} could not be found.`);
         return [];
       }
     }
@@ -112,9 +106,7 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
       args.push("-l", config);
     }
 
-    args.push("-f", "%k:%n:%l:%c:%d:%m\n");
-    args.push("-q");
-    args.push("-I");
+    args.push("-f", "%k:%n:%l:%c:%d:%m\n", "-q", "-I");
 
     const {
       stdout: output,
@@ -128,26 +120,18 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
     return { output, error: error ?? (stderr && new Error(stderr)) };
   }
 
-  private parseLintOutput(
-    document: TextDocument,
-    output: string
-  ): Diagnostic[] {
+  private parseLintOutput(document: TextDocument, output: string): Diagnostic[] {
     const diagnostics: Diagnostic[] = [];
     for (const lintEntry of output.trim().split("\n")) {
-      const [severity, code, line, column, length, message] = lintEntry.split(
-        ":",
-        6
-      );
-      const start = new Position(+line - 1, +column - 1);
-      const end = document.positionAt(document.offsetAt(start) + +length);
+      const [severity, code, line, column, length, message] = lintEntry.split(":", 6);
+      const start = new Position(Number(line) - 1, Number(column) - 1);
+      const end = document.positionAt(document.offsetAt(start) + Number(length));
       diagnostics.push(
         new Diagnostic(
           new Range(start, end),
           `[${LaTeXDocumentLinter.EXECUTABLE}] ${code}: ${message}`,
-          LintMessageSeverityToDiagnosticSeverity[
-            severity as LintMessageSeverity
-          ]
-        )
+          LintMessageSeverityToDiagnosticSeverity[severity as LintMessageSeverity],
+        ),
       );
     }
     return diagnostics;
