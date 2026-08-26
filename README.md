@@ -122,6 +122,18 @@ For example, if `latex.*.config` is `test/someconfig.yaml`, then if a file `F` i
 - For caching, if a configuration file is suddenly lower in priority than a new configuration (according to [Configuration File Names](#configuration-file-names)), then the new configuration file may not be noticed. In this case, reload the window.
 - If `-v` is specified in the `CmdLine` option of the linter configuration, the linter will break since `-v` overrides the extension's custom `-f` formatting for lint messages.
 
+## Contributing
+
+Start with a [Discussion](../../discussions/new), not a pull request. A
+Mathematic maintainer will review the proposal. If we decide to implement it, a
+maintainer or one of our AI agents will open the pull request. When Mathematic
+implements a proposal, the implementation pull request will link to the
+Discussion and credit its original author. GitHub restricts pull request creation
+to Mathematic maintainers, repository collaborators with write, maintain, or
+admin access, and authorized maintenance agents.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full policy.
+
 ## Special Thanks
 
 The syntax is provided by [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop).
