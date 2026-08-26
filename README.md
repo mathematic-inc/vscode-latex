@@ -26,9 +26,9 @@ This extension is intended for users accustomed to the typical developer workflo
 ## Requirements
 
 - [latexindent.pl](https://github.com/cmhughes/latexindent.pl): A `perl` script for formatting LaTeX.
- - You will also need to install some Perl dependencies. Just install
-   [`cpanm`](https://metacpan.org/dist/App-cpanminus/view/bin/cpanm) and you
-   will be prompted in your first format to install dependencies.
+  - You will also need to install some Perl dependencies. Just install
+    [`cpanm`](https://metacpan.org/dist/App-cpanminus/view/bin/cpanm) and you
+    will be prompted in your first format to install dependencies.
 - [ChkTeX](https://www.nongnu.org/chktex/): A LaTeX semantic checker; i.e. linter.
 
 Both come with most `TeX` distributions (look for the `latexindent` and `chktex` package)
@@ -64,7 +64,7 @@ Both come with most `TeX` distributions (look for the `latexindent` and `chktex`
 
 ## Configuration Files
 
-> **Warning.** Since we don't parse configuration files, we don't know what options exist ahead of time so we ignore all options if a configuration is found for a particular function. In particular, if a formatter configuration is found, the `formatter.columnLimit` option and VS Code's tab size/"indent or spaces" options are ignored.
+> **Warning.** Since we don't parse configuration files, we don't know what options exist ahead of time so we ignore all options if a configuration is found for a particular function. In particular, if a formatter configuration is found, the `formatter.columnLimit` option and VS Code's indentation settings are ignored.
 
 Configuration files are resolved through this extension rather than through the formatter/linter. The resolution algorithm is a superset of theirs.
 
@@ -90,11 +90,11 @@ In accordance with the resolution algorithm of the linter, the configuration fil
 
 #### Formatter
 
-The formatter configuration file is written in YAML. See [their documentation](https://ctan.mirrors.hoobly.com/support/latexindent/documentation/latexindent.pdf) for options.
+The formatter configuration file is written in YAML. See [their documentation](https://mirrors.ctan.org/support/latexindent/documentation/latexindent.pdf) for options.
 
 #### Linter
 
-The linter configuration file is written in their proprietary format. See [this example](https://github.com/sharelatex/chktex/blob/master/chktexrc) for inspiration.
+The linter configuration file is written in their proprietary format. See [this example](https://github.com/overleaf/chktex/blob/master/chktexrc) for inspiration.
 
 > **Warning**. If `-v` is specified in the `CmdLine` option of the linter configuration, the linter will break since `-v` overrides the extension's custom `-f` formatting for lint messages.
 
@@ -103,7 +103,7 @@ The linter configuration file is written in their proprietary format. See [this 
 If a configuration file is not found within the directory of the current file, the resolution algorithm is as follows (in order):
 
 - Search the parent of the file.
-- Search the parent of the ... of the parent of the file until we are at the root.
+- Search each successive parent directory until reaching the root.
 
 Note the workspace is also searched at some point with the above resolution.
 
@@ -124,7 +124,9 @@ For example, if `latex.*.config` is `test/someconfig.yaml`, then if a file `F` i
 
 ## Contributing
 
-Start with a [Discussion](../../discussions/new), not a pull request. A
+Start with a
+[Discussion](https://github.com/mathematic-inc/vscode-latex/discussions/new),
+not a pull request. A
 Mathematic maintainer will review the proposal. If we decide to implement it, a
 maintainer or one of our AI agents will open the pull request. When Mathematic
 implements a proposal, the implementation pull request will link to the

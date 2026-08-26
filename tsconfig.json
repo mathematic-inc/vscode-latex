@@ -3,14 +3,25 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "target": "ESNext",
-    "lib": ["ESNext"],
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "types": ["node"],
     "rootDir": "src",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedSideEffectImports": true,
+    "strictBuiltinIteratorReturn": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "verbatimModuleSyntax": true
   },
+  "include": ["src"],
   "exclude": ["node_modules", ".vscode-test", "third_party"]
 }

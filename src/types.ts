@@ -17,7 +17,5 @@
 import type { Diagnostic, TextDocument } from "vscode";
 
 export interface DocumentLintingProvider {
-  provideDocumentLintingDiagnostics(
-    document: TextDocument
-  ): Promise<readonly Diagnostic[]>;
+  provideDocumentLintingDiagnostics(document: TextDocument): Promise<readonly Diagnostic[]>;
 }

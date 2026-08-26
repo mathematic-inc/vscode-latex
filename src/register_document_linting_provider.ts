@@ -23,19 +23,18 @@ import {
   window as Window,
   workspace as Workspace,
 } from "vscode";
+
 import type { DocumentLintingProvider } from "./types";
 import { getConfig } from "./utils";
 
 export function registerDocumentLintingProvider(
   selector: DocumentSelector,
-  linters: readonly DocumentLintingProvider[]
+  linters: readonly DocumentLintingProvider[],
 ) {
   const runLinters = async (document: TextDocument) => {
     const diagnostics: Diagnostic[] = [];
     for (const linter of linters) {
-      diagnostics.push(
-        ...(await linter.provideDocumentLintingDiagnostics(document))
-      );
+      diagnostics.push(...(await linter.provideDocumentLintingDiagnostics(document)));
     }
     diagnosticCollection.set(document.uri, diagnostics);
   };
@@ -49,16 +48,14 @@ export function registerDocumentLintingProvider(
       return;
     }
     if (force) {
-      return runLinters(document);
+      void runLinters(document);
+      return;
     }
 
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
-    debounceTimer = setTimeout(
-      () => runLinters(document),
-      getConfig("linter.delay")
-    );
+    debounceTimer = setTimeout(() => runLinters(document), getConfig("linter.delay"));
   };
 
   let activeEditor = Window.activeTextEditor;
@@ -82,7 +79,7 @@ export function registerDocumentLintingProvider(
       }
     },
     undefined,
-    disposables
+    disposables,
   );
 
   Workspace.onDidChangeTextDocument(
@@ -92,7 +89,7 @@ export function registerDocumentLintingProvider(
       }
     },
     undefined,
-    disposables
+    disposables,
   );
 
   return {

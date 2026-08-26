@@ -15,6 +15,7 @@
  */
 
 import { type ExtensionContext, languages as Languages } from "vscode";
+
 import { LaTeXDocumentFormatter } from "./latex_document_formatter";
 import { LaTeXDocumentLinter } from "./latex_document_linter";
 import { registerDocumentLintingProvider } from "./register_document_linting_provider";
@@ -26,13 +27,8 @@ const LATEX_MODE = {
 
 export function activate(context: ExtensionContext) {
   context.subscriptions.push(
-    Languages.registerDocumentFormattingEditProvider(
-      LATEX_MODE,
-      new LaTeXDocumentFormatter()
-    )
-  );
-  context.subscriptions.push(
-    registerDocumentLintingProvider(LATEX_MODE, [new LaTeXDocumentLinter()])
+    Languages.registerDocumentFormattingEditProvider(LATEX_MODE, new LaTeXDocumentFormatter()),
+    registerDocumentLintingProvider(LATEX_MODE, [new LaTeXDocumentLinter()]),
   );
 }
 

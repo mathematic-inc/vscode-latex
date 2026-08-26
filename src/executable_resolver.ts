@@ -17,7 +17,9 @@
 import { spawnSync } from "node:child_process";
 import { platform } from "node:os";
 import { isAbsolute, join, normalize } from "node:path";
+
 import { workspace as Workspace } from "vscode";
+
 import { Cache } from "./cache";
 import { isExecutable } from "./utils";
 
@@ -41,6 +43,7 @@ export class ExecutableResolver {
         return;
       }
     }
+    return executable;
   }
 
   readonly #cache = new Cache<{ exec?: string }>();
@@ -48,11 +51,7 @@ export class ExecutableResolver {
   readonly #extensions: Set<string>;
   readonly #paths: Set<string>;
 
-  constructor(
-    name: string,
-    extensions: Set<string>,
-    paths: Set<string> = new Set()
-  ) {
+  constructor(name: string, extensions: Set<string>, paths: Set<string> = new Set()) {
     this.#name = name;
     this.#extensions = extensions;
     this.#paths = paths;

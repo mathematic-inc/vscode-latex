@@ -16,6 +16,7 @@
 
 import { X_OK } from "node:constants";
 import { accessSync } from "node:fs";
+
 import { workspace as Workspace } from "vscode";
 
 export function getConfig<T>(section: string) {
