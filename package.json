@@ -36,7 +36,6 @@
     "lint": "oxlint --deny-warnings .",
     "package": "pnpm run copy && tsup --minify",
     "prepare": "if [ -z \"$CI\" ] && command -v hk >/dev/null 2>&1; then hk install; fi",
-    "pretest": "pnpm run lint",
     "typecheck": "tsc --noEmit",
     "vscode:prepublish": "pnpm run package",
     "watch": "tsup --watch"
