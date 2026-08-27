@@ -547,7 +547,7 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "22.18.10",
+    "@types/node": "26.2.0",
     "@types/vscode": "1.110.0",
     "@vscode/vsce": "^3.9.2",
     "tsup": "^8.5.1",
