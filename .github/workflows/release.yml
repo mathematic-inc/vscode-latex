@@ -71,7 +71,6 @@ jobs:
     environment: release
     permissions:
       contents: write
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -95,14 +94,6 @@ jobs:
           files: dist/*
           fail_on_unmatched_files: true
           make_latest: ${{ !contains(github.ref_name, '-') }}
-
-      - name: Trigger release notes workflow
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          gh workflow run release-notes.yml \
-            --field tag="$TAG"
 
   publish-vscode:
     name: Publish VSCode Extension
