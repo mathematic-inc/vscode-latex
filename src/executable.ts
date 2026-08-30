@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-import { workspace as Workspace } from "vscode";
+import { X_OK } from "node:constants";
+import { accessSync } from "node:fs";
 
-export function getConfig<T>(section: string) {
-  return Workspace.getConfiguration("latex").get<T>(section);
+export function findExecutable(output: string) {
+  return output
+    .split(/\r?\n/v)
+    .map((file) => file.trim())
+    .find((file) => file.length > 0 && isExecutable(file));
+}
+
+export function isExecutable(file: string) {
+  try {
+    accessSync(file, X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }

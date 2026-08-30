@@ -34,8 +34,9 @@
     "fix": "oxlint --fix --deny-warnings . && oxfmt --write src tsup.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json",
     "format": "oxfmt --write src tsup.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json",
     "lint": "oxlint --deny-warnings .",
-    "package": "pnpm run copy && tsup --minify",
+    "package": "pnpm test && pnpm run copy && tsup --minify",
     "prepare": "if [ -z \"$CI\" ] && command -v hk >/dev/null 2>&1; then hk install; fi",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test src/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "vscode:prepublish": "pnpm run package",
     "watch": "tsup --watch"

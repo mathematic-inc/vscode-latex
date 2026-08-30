@@ -21,7 +21,7 @@ import { isAbsolute, join, normalize } from "node:path";
 import { workspace as Workspace } from "vscode";
 
 import { Cache } from "./cache";
-import { isExecutable } from "./utils";
+import { findExecutable, isExecutable } from "./executable";
 
 export class ExecutableResolver {
   static findExecutableInPath(path: string): string | undefined {
@@ -90,8 +90,8 @@ export class ExecutableResolver {
         encoding: "utf-8",
       });
       if (status === 0) {
-        exec = stdout.trim();
-        if (isExecutable(exec)) {
+        exec = findExecutable(stdout);
+        if (exec) {
           this.#cache.set("exec", exec);
           return exec;
         }
