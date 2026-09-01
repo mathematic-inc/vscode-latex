@@ -15,19 +15,25 @@
  */
 
 import { X_OK } from "node:constants";
-import { accessSync } from "node:fs";
 import { platform } from "node:os";
 
-export function findExecutable(output: string) {
-  return output
-    .split(/\r?\n/v)
-    .map((file) => file.trim())
-    .find((file) => file.length > 0 && isExecutable(file));
+import type { Operation } from "effection";
+
+import { access } from "./node";
+
+export function* findExecutable(output: string): Operation<string | undefined> {
+  for (const line of output.split(/\r?\n/v)) {
+    const file = line.trim();
+    if (file && (yield* isExecutable(file))) {
+      return file;
+    }
+  }
+  return;
 }
 
-export function isExecutable(file: string) {
+export function* isExecutable(file: string): Operation<boolean> {
   try {
-    accessSync(file, X_OK);
+    yield* access(file, X_OK);
     return true;
   } catch {
     return false;
@@ -52,4 +58,17 @@ export function getExecutableInvocation(
     return [commandShell, ["/d", "/c", `"${executable}"`, ...args]];
   }
   return [executable, args];
+}
+
+export function getErrorMessage(error: unknown) {
+  if (
+    error &&
+    typeof error === "object" &&
+    "stderr" in error &&
+    typeof error.stderr === "string" &&
+    error.stderr.trim()
+  ) {
+    return error.stderr.trim();
+  }
+  return error instanceof Error ? error.message : String(error);
 }

@@ -18,13 +18,15 @@ import assert from "node:assert/strict";
 import { chmodSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import test from "node:test";
 
-import { findExecutable, getExecutableInvocation, getTexPackageManagers } from "./executable.ts";
+import { run } from "effection";
+import { onTestFinished, test } from "vitest";
 
-test("returns the first executable from multiline locator output", (context) => {
+import { findExecutable, getExecutableInvocation, getTexPackageManagers } from "./executable";
+
+test("returns the first executable from multiline locator output", async () => {
   const directory = mkdtempSync(join(tmpdir(), "vscode-latex-"));
-  context.after(() => rmSync(directory, { recursive: true }));
+  onTestFinished(() => rmSync(directory, { recursive: true }));
 
   const first = join(directory, "first");
   const second = join(directory, "second");
@@ -33,7 +35,7 @@ test("returns the first executable from multiline locator output", (context) => 
     chmodSync(file, 0o755);
   }
 
-  assert.equal(findExecutable(`${first}\r\n${second}\r\n`), first);
+  assert.equal(await run(() => findExecutable(`${first}\r\n${second}\r\n`)), first);
 });
 
 test("installs TeX packages with supported distribution managers", () => {

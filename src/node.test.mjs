@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-import type { Diagnostic, TextDocument } from "vscode";
+import assert from "node:assert/strict";
 
-export interface DocumentLintingProvider {
-  provideDocumentLintingDiagnostics(document: TextDocument): Promise<readonly Diagnostic[]>;
-}
+import { run } from "effection";
+import { test } from "vitest";
+
+import { execFile } from "./node";
+
+test("executes files asynchronously with standard input", async () => {
+  const { stdout } = await run(() =>
+    execFile(
+      process.execPath,
+      ["--input-type=module", "--eval", "process.stdin.pipe(process.stdout)"],
+      { input: "LaTeX" },
+    ),
+  );
+  assert.equal(stdout, "LaTeX");
+});

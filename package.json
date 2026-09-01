@@ -36,7 +36,7 @@
     "lint": "oxlint --deny-warnings .",
     "package": "pnpm test && pnpm run copy && tsup --minify",
     "prepare": "if [ -z \"$CI\" ] && command -v hk >/dev/null 2>&1; then hk install; fi",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test src/*.test.mjs",
+    "test": "vitest run src",
     "typecheck": "tsc --noEmit",
     "vscode:prepublish": "pnpm run package",
     "watch": "tsup --watch"
@@ -546,12 +546,16 @@
       }
     ]
   },
+  "dependencies": {
+    "effection": "4.1.0"
+  },
   "devDependencies": {
     "@types/node": "26.4.0",
     "@types/vscode": "1.134.0",
     "@vscode/vsce": "^3.9.2",
     "tsup": "^8.5.1",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "4.1.11"
   },
   "packageManager": "pnpm@11.24.0+sha512.bd27e345e976dcb0be0b7a1228217b049a817e21b1f355c90dbe7dc46671895a8bc1e6d06c24554505ea93ea0b45f489a27ec1bfbc8de6a9659fca0f16fa0000",
   "engines": {
