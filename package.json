@@ -30,7 +30,7 @@
     "prebuild": "pnpm run copy",
     "build": "tsup",
     "check": "pnpm run typecheck && oxlint --deny-warnings . && oxfmt --check src tsup.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json",
-    "copy": "rm -rf snippets syntax && mkdir -p snippets && cp third_party/LaTeX-Workshop/data/latex-snippet.json snippets/latex.json && cp -R third_party/LaTeX-Workshop/syntax .",
+    "copy": "rm -rf snippets syntax && mkdir -p snippets && cp third_party/LaTeX-Workshop/data/latex-snippet.json snippets/latex.json && cp -R third_party/LaTeX-Workshop/syntax . && node -e 'const fs=require(\"node:fs\"),p=\"syntax/LaTeX.tmLanguage.json\";fs.writeFileSync(p,fs.readFileSync(p,\"utf8\").replaceAll(\"\\\"$self\\\"\",\"\\\"$base\\\"\"))'",
     "fix": "oxlint --fix --deny-warnings . && oxfmt --write src tsup.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json",
     "format": "oxfmt --write src tsup.config.ts package.json tsconfig.json .oxlintrc.json .oxfmtrc.json",
     "lint": "oxlint --deny-warnings .",
