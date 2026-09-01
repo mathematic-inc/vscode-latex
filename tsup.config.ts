@@ -6,5 +6,6 @@ export default defineConfig({
   target: "es2024",
   external: ["vscode"],
   outDir: "dist",
+  clean: true,
   sourcemap: true,
 });

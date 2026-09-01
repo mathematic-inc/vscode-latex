@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import { type ExtensionContext, languages as Languages } from "vscode";
+import { createScope } from "effection";
+import { Disposable, type ExtensionContext, languages } from "vscode";
 
-import { LaTeXDocumentFormatter } from "./latex_document_formatter";
-import { LaTeXDocumentLinter } from "./latex_document_linter";
-import { registerDocumentLintingProvider } from "./register_document_linting_provider";
+import { Formatter } from "./formatter";
+import { Linter } from "./linter";
+import { registerLinter } from "./register_linter";
 
-const LATEX_MODE = {
+const LATEX = {
   scheme: "file",
   language: "latex",
 };
 
 export function activate(context: ExtensionContext) {
+  const [scope, destroy] = createScope();
+  const linter = new Linter();
+  scope.run(() => registerLinter(LATEX, (document) => linter.lint(document)));
   context.subscriptions.push(
-    Languages.registerDocumentFormattingEditProvider(LATEX_MODE, new LaTeXDocumentFormatter()),
-    registerDocumentLintingProvider(LATEX_MODE, [new LaTeXDocumentLinter()]),
+    languages.registerDocumentFormattingEditProvider(LATEX, new Formatter(scope)),
+    new Disposable(() => {
+      void destroy();
+    }),
   );
-}
-
-export function deactivate() {
-  // No cleanup needed
 }

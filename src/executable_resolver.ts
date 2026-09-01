@@ -14,36 +14,67 @@
  * limitations under the License.
  */
 
-import { execFile as execFileCallback, spawnSync } from "node:child_process";
 import { platform } from "node:os";
 import { isAbsolute, join, normalize } from "node:path";
-import { promisify } from "node:util";
 
-import { ProgressLocation, window as Window, workspace as Workspace } from "vscode";
+import { type Operation, spawn, type Task, useScope } from "effection";
+import { ProgressLocation, window, workspace } from "vscode";
 
-import { Cache } from "./cache";
 import {
   findExecutable,
+  getErrorMessage,
   getExecutableInvocation,
   getTexPackageManagers,
   isExecutable,
 } from "./executable";
+import { execFile } from "./node";
+import { fromThenable, withCancellation } from "./vscode";
 
-const execFile = promisify(execFileCallback);
 const INSTALL = "Install";
 
 export class ExecutableResolver {
-  static findExecutableInPath(path: string): string | undefined {
+  readonly #extensions: readonly string[];
+  readonly #name: string;
+  readonly #paths: readonly string[];
+  #executable: string | undefined;
+  #installation: Task<string | undefined> | undefined;
+
+  constructor(name: string, extensions: Iterable<string>, paths: Iterable<string> = []) {
+    this.#name = name;
+    this.#extensions = [...extensions];
+    this.#paths = [...paths];
+  }
+
+  *resolve(configuredPath = ""): Operation<string | undefined> {
+    if (!configuredPath) {
+      return yield* this.#findOrInstall();
+    }
+
+    const executable = yield* ExecutableResolver.#findExecutableInPath(configuredPath);
+    if (!executable) {
+      yield* fromThenable(
+        window.showErrorMessage(
+          `Specified path ${configuredPath} could not be found${
+            isAbsolute(configuredPath) ? "" : " in any opened workspace folder"
+          }.`,
+        ),
+      );
+    }
+    return executable;
+  }
+
+  static *#findExecutableInPath(path: string): Operation<string | undefined> {
     let executable = normalize(path);
     if (isAbsolute(executable)) {
-      if (!isExecutable(executable)) {
+      if (!(yield* isExecutable(executable))) {
         return;
       }
     } else {
       let found = false;
-      for (const workspaceFolder of Workspace.workspaceFolders ?? []) {
-        executable = join(workspaceFolder.uri.fsPath, executable);
-        if (isExecutable(executable)) {
+      const relativePath = executable;
+      for (const workspaceFolder of workspace.workspaceFolders ?? []) {
+        executable = join(workspaceFolder.uri.fsPath, relativePath);
+        if (yield* isExecutable(executable)) {
           found = true;
           break;
         }
@@ -55,109 +86,106 @@ export class ExecutableResolver {
     return executable;
   }
 
-  readonly #cache = new Cache<{ exec?: string }>();
-  readonly #name: string;
-  readonly #extensions: Set<string>;
-  readonly #paths: Set<string>;
-  #installation: Promise<string | undefined> | undefined;
-
-  constructor(name: string, extensions: Set<string>, paths: Set<string> = new Set()) {
-    this.#name = name;
-    this.#extensions = extensions;
-    this.#paths = paths;
-  }
-
-  findExecutable() {
-    return this.resolveExecutable(this.#name);
-  }
-
-  findOrInstall(): Promise<string | undefined> {
-    const executable = this.findExecutable();
+  *#findOrInstall(): Operation<string | undefined> {
+    const executable = yield* this.#resolveExecutable();
     if (executable) {
-      return Promise.resolve(executable);
+      return executable;
     }
-    this.#installation ??= this.install().finally(() => {
-      this.#installation = undefined;
-    });
-    return this.#installation;
+
+    const installation =
+      this.#installation ?? (this.#installation = yield* spawn(() => this.#install()));
+    try {
+      return yield* installation;
+    } finally {
+      if (this.#installation === installation) {
+        this.#installation = undefined;
+      }
+    }
   }
 
-  private async install(): Promise<string | undefined> {
-    if ((await Window.showErrorMessage(`${this.#name} could not be found.`, INSTALL)) !== INSTALL) {
+  *#install(): Operation<string | undefined> {
+    if (
+      (yield* fromThenable(
+        window.showErrorMessage(`${this.#name} could not be found.`, INSTALL),
+      )) !== INSTALL
+    ) {
       return;
     }
 
-    const managerExtensions = new Set(platform() === "win32" ? [".exe", ".bat", ".cmd"] : []);
+    const scope = yield* useScope();
+    const managerExtensions = platform() === "win32" ? [".exe", ".bat", ".cmd"] : [];
     for (const [name, args] of getTexPackageManagers(this.#name)) {
-      const manager = new ExecutableResolver(name, managerExtensions).findExecutable();
+      const manager = yield* new ExecutableResolver(name, managerExtensions).#resolveExecutable();
       if (!manager) {
         continue;
       }
       const [command, commandArgs] = getExecutableInvocation(manager, args);
       try {
-        await Window.withProgress(
-          {
-            location: ProgressLocation.Notification,
-            title: `Installing ${this.#name}`,
-          },
-          () => execFile(command, commandArgs),
+        const result = yield* fromThenable(
+          window.withProgress(
+            {
+              cancellable: true,
+              location: ProgressLocation.Notification,
+              title: `Installing ${this.#name}`,
+            },
+            (_progress, token) =>
+              scope.run(() => withCancellation(token, execFile(command, commandArgs), undefined)),
+          ),
         );
+        if (!result) {
+          return;
+        }
       } catch (error) {
-        await Window.showErrorMessage(
-          `Could not install ${this.#name}: ${error instanceof Error ? error.message : String(error)}`,
+        yield* fromThenable(
+          window.showErrorMessage(`Could not install ${this.#name}: ${getErrorMessage(error)}`),
         );
         return;
       }
 
-      const executable = this.findExecutable();
+      const executable = yield* this.#resolveExecutable();
       if (!executable) {
-        await Window.showErrorMessage(
-          `${this.#name} was installed but could not be found. Reload VS Code and try again.`,
+        yield* fromThenable(
+          window.showErrorMessage(
+            `${this.#name} was installed but could not be found. Reload VS Code and try again.`,
+          ),
         );
       }
       return executable;
     }
 
-    await Window.showErrorMessage(
-      `Could not install ${this.#name}: no TeX Live or MiKTeX package manager was found.`,
+    yield* fromThenable(
+      window.showErrorMessage(
+        `Could not install ${this.#name}: no TeX Live or MiKTeX package manager was found.`,
+      ),
     );
     return;
   }
 
-  private resolveExecutable(name: string): string | undefined {
-    let exec = this.#cache.get("exec");
-    if (exec && isExecutable(exec)) {
-      return exec;
+  *#resolveExecutable(): Operation<string | undefined> {
+    if (this.#executable && (yield* isExecutable(this.#executable))) {
+      return this.#executable;
     }
 
-    let which: string;
-    switch (platform()) {
-      case "win32":
-        which = "where";
-        break;
-      default:
-        which = "which";
-        break;
-    }
+    const which = platform() === "win32" ? "where" : "which";
 
     for (const extension of [...this.#extensions, ""]) {
-      const filename = `${name}${extension}`;
+      const filename = `${this.#name}${extension}`;
       for (const path of this.#paths) {
-        exec = join(path, filename).trim();
-        if (isExecutable(exec)) {
-          this.#cache.set("exec", exec);
-          return exec;
+        const executable = join(path, filename).trim();
+        if (yield* isExecutable(executable)) {
+          this.#executable = executable;
+          return executable;
         }
       }
-      const { status, stdout } = spawnSync(which, [filename], {
-        encoding: "utf-8",
-      });
-      if (status === 0) {
-        exec = findExecutable(stdout);
-        if (exec) {
-          this.#cache.set("exec", exec);
-          return exec;
+      try {
+        const { stdout } = yield* execFile(which, [filename]);
+        const executable = yield* findExecutable(stdout);
+        if (executable) {
+          this.#executable = executable;
+          return executable;
         }
+      } catch {
+        // Try the next extension.
       }
     }
 
