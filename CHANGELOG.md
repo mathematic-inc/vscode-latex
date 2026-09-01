@@ -4,6 +4,18 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.1.0](https://github.com/mathematic-inc/vscode-latex/compare/v2.0.2...v2.1.0) (2026-09-01)
+
+
+### Features
+
+* Install missing TeX tools on demand ([#26](https://github.com/mathematic-inc/vscode-latex/issues/26)) ([f705fa4](https://github.com/mathematic-inc/vscode-latex/commit/f705fa4d08f0a9c26c30781b200e0cafbebe9f1d))
+
+
+### Bug Fixes
+
+* Recognize weave chunks in nested LaTeX scopes ([#24](https://github.com/mathematic-inc/vscode-latex/issues/24)) ([d766a9d](https://github.com/mathematic-inc/vscode-latex/commit/d766a9d1c042b4021678c990e671f540fd527472))
+
 ## [2.0.2](https://github.com/mathematic-inc/vscode-latex/compare/v2.0.1...v2.0.2) (2026-08-30)
 
 
