@@ -4,6 +4,13 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.2.0](https://github.com/mathematic-inc/vscode-latex/compare/v2.1.0...v2.2.0) (2026-09-01)
+
+
+### Features
+
+* Add one-time nonprofit support prompt ([#30](https://github.com/mathematic-inc/vscode-latex/issues/30)) ([2ca1d6c](https://github.com/mathematic-inc/vscode-latex/commit/2ca1d6cfe5c37740ac50db9075014fe26bfc6618))
+
 ## [2.1.0](https://github.com/mathematic-inc/vscode-latex/compare/v2.0.2...v2.1.0) (2026-09-01)
 
 
