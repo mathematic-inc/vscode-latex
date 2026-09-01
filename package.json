@@ -560,6 +560,9 @@
       }
     ]
   },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "dependencies": {
     "effection": "4.1.0"
   },

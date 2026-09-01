@@ -15,7 +15,7 @@
  */
 
 import { createScope } from "effection";
-import { Disposable, type ExtensionContext, languages } from "vscode";
+import { Disposable, env, type ExtensionContext, languages, Uri, window } from "vscode";
 
 import { Formatter } from "./formatter";
 import { Linter } from "./linter";
@@ -27,6 +27,20 @@ const LATEX = {
 };
 
 export function activate(context: ExtensionContext) {
+  if (!context.globalState.get<boolean>("supportPromptShown")) {
+    void context.globalState.update("supportPromptShown", true);
+    void window
+      .showInformationMessage(
+        "Mathematic is a 501(c)(3) non-profit. Please consider supporting our free, open-source work.",
+        "Support Mathematic",
+      )
+      .then((selection) => {
+        if (selection === "Support Mathematic") {
+          void env.openExternal(Uri.parse("https://github.com/sponsors/mathematic-inc"));
+        }
+      });
+  }
+
   const [scope, destroy] = createScope();
   const linter = new Linter();
   scope.run(() => registerLinter(LATEX, (document) => linter.lint(document)));
