@@ -22,7 +22,12 @@ import { promisify } from "node:util";
 import { ProgressLocation, window as Window, workspace as Workspace } from "vscode";
 
 import { Cache } from "./cache";
-import { findExecutable, getTexPackageManagers, isExecutable } from "./executable";
+import {
+  findExecutable,
+  getExecutableInvocation,
+  getTexPackageManagers,
+  isExecutable,
+} from "./executable";
 
 const execFile = promisify(execFileCallback);
 const INSTALL = "Install";
@@ -88,13 +93,14 @@ export class ExecutableResolver {
       if (!manager) {
         continue;
       }
+      const [command, commandArgs] = getExecutableInvocation(manager, args);
       try {
         await Window.withProgress(
           {
             location: ProgressLocation.Notification,
             title: `Installing ${this.#name}`,
           },
-          () => execFile(manager, args),
+          () => execFile(command, commandArgs),
         );
       } catch (error) {
         await Window.showErrorMessage(
