@@ -79,9 +79,8 @@ export class LaTeXDocumentLinter implements DocumentLintingProvider {
       }
       exec = path;
     } else {
-      exec = this.#executableResolver.findExecutable();
+      exec = await this.#executableResolver.findOrInstall();
       if (!exec) {
-        await Window.showErrorMessage(`${LaTeXDocumentLinter.EXECUTABLE} could not be found.`);
         return [];
       }
     }

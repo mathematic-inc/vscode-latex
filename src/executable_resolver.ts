@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import { spawnSync } from "node:child_process";
+import { execFile as execFileCallback, spawnSync } from "node:child_process";
 import { platform } from "node:os";
 import { isAbsolute, join, normalize } from "node:path";
+import { promisify } from "node:util";
 
-import { workspace as Workspace } from "vscode";
+import { ProgressLocation, window as Window, workspace as Workspace } from "vscode";
 
 import { Cache } from "./cache";
-import { findExecutable, isExecutable } from "./executable";
+import { findExecutable, getTexPackageManagers, isExecutable } from "./executable";
+
+const execFile = promisify(execFileCallback);
+const INSTALL = "Install";
 
 export class ExecutableResolver {
   static findExecutableInPath(path: string): string | undefined {
@@ -50,6 +54,7 @@ export class ExecutableResolver {
   readonly #name: string;
   readonly #extensions: Set<string>;
   readonly #paths: Set<string>;
+  #installation: Promise<string | undefined> | undefined;
 
   constructor(name: string, extensions: Set<string>, paths: Set<string> = new Set()) {
     this.#name = name;
@@ -59,6 +64,58 @@ export class ExecutableResolver {
 
   findExecutable() {
     return this.resolveExecutable(this.#name);
+  }
+
+  findOrInstall(): Promise<string | undefined> {
+    const executable = this.findExecutable();
+    if (executable) {
+      return Promise.resolve(executable);
+    }
+    this.#installation ??= this.install().finally(() => {
+      this.#installation = undefined;
+    });
+    return this.#installation;
+  }
+
+  private async install(): Promise<string | undefined> {
+    if ((await Window.showErrorMessage(`${this.#name} could not be found.`, INSTALL)) !== INSTALL) {
+      return;
+    }
+
+    const managerExtensions = new Set(platform() === "win32" ? [".exe", ".bat", ".cmd"] : []);
+    for (const [name, args] of getTexPackageManagers(this.#name)) {
+      const manager = new ExecutableResolver(name, managerExtensions).findExecutable();
+      if (!manager) {
+        continue;
+      }
+      try {
+        await Window.withProgress(
+          {
+            location: ProgressLocation.Notification,
+            title: `Installing ${this.#name}`,
+          },
+          () => execFile(manager, args),
+        );
+      } catch (error) {
+        await Window.showErrorMessage(
+          `Could not install ${this.#name}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        return;
+      }
+
+      const executable = this.findExecutable();
+      if (!executable) {
+        await Window.showErrorMessage(
+          `${this.#name} was installed but could not be found. Reload VS Code and try again.`,
+        );
+      }
+      return executable;
+    }
+
+    await Window.showErrorMessage(
+      `Could not install ${this.#name}: no TeX Live or MiKTeX package manager was found.`,
+    );
+    return;
   }
 
   private resolveExecutable(name: string): string | undefined {

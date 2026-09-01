@@ -87,9 +87,8 @@ export class LaTeXDocumentFormatter implements DocumentFormattingEditProvider {
       }
       exec = path;
     } else {
-      exec = this.#executableResolver.findExecutable();
+      exec = await this.#executableResolver.findOrInstall();
       if (!exec) {
-        await Window.showErrorMessage(`${LaTeXDocumentFormatter.EXECUTABLE} could not be found.`);
         return [];
       }
     }

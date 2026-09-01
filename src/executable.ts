@@ -32,3 +32,11 @@ export function isExecutable(file: string) {
     return false;
   }
 }
+
+export function getTexPackageManagers(packageName: string) {
+  return [
+    ["tlmgr", ["install", packageName]],
+    ["miktex", ["packages", "install", packageName]],
+    ["mpm", [`--install=${packageName}`]],
+  ] as const;
+}
