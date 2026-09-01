@@ -35,12 +35,19 @@ const INSTALL = "Install";
 export class ExecutableResolver {
   readonly #extensions: readonly string[];
   readonly #name: string;
+  readonly #packageName: string;
   readonly #paths: readonly string[];
   #executable: string | undefined;
   #installation: Task<string | undefined> | undefined;
 
-  constructor(name: string, extensions: Iterable<string>, paths: Iterable<string> = []) {
+  constructor(
+    name: string,
+    extensions: Iterable<string>,
+    paths: Iterable<string> = [],
+    packageName = name,
+  ) {
     this.#name = name;
+    this.#packageName = packageName;
     this.#extensions = [...extensions];
     this.#paths = [...paths];
   }
@@ -114,7 +121,7 @@ export class ExecutableResolver {
 
     const scope = yield* useScope();
     const managerExtensions = platform() === "win32" ? [".exe", ".bat", ".cmd"] : [];
-    for (const [name, args] of getTexPackageManagers(this.#name)) {
+    for (const [name, args] of getTexPackageManagers(this.#packageName)) {
       const manager = yield* new ExecutableResolver(name, managerExtensions).#resolveExecutable();
       if (!manager) {
         continue;

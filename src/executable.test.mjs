@@ -44,6 +44,11 @@ test("installs TeX packages with supported distribution managers", () => {
     ["miktex", ["packages", "install", "chktex"]],
     ["mpm", ["--install=chktex"]],
   ]);
+  assert.deepEqual(getTexPackageManagers("latex-formatter"), [
+    ["tlmgr", ["install", "latex-formatter"]],
+    ["miktex", ["packages", "install", "latex-formatter"]],
+    ["mpm", ["--install=latex-formatter"]],
+  ]);
 });
 
 test("runs Windows batch package managers through cmd.exe", () => {

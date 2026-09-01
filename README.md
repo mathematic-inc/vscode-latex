@@ -17,7 +17,7 @@ code --install-extension mathematic.vscode-latex
 - Linting.
 - LaTeX snippets.
 
-Both linting and formatting work with remote and unsaved files. They can also be customized with their respective proprietary configurations. See [Configuration Files](#configuration-files) and [Extension Settings](#extension-settings).
+Both linting and formatting work with remote and unsaved files. They can also be customized with their native configuration files. See [Configuration Files](#configuration-files) and [Extension Settings](#extension-settings).
 
 ## Purpose
 
@@ -25,13 +25,15 @@ This extension is intended for users accustomed to the typical developer workflo
 
 ## Requirements
 
-- [latexindent.pl](https://github.com/cmhughes/latexindent.pl): A `perl` script for formatting LaTeX.
-  - You will also need to install some Perl dependencies. Just install
-    [`cpanm`](https://metacpan.org/dist/App-cpanminus/view/bin/cpanm) and you
-    will be prompted in your first format to install dependencies.
+- One of the supported formatters:
+  - [latexindent.pl](https://github.com/cmhughes/latexindent.pl): A `perl` script for formatting LaTeX.
+    Install [`cpanm`](https://metacpan.org/dist/App-cpanminus/view/bin/cpanm)
+    and the extension will offer to install its Perl dependencies on the first
+    format.
+  - [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt): A fast LaTeX formatter written in Rust.
 - [ChkTeX](https://www.nongnu.org/chktex/): A LaTeX semantic checker; i.e. linter.
 
-Both come with most `TeX` distributions (look for the `latexindent` and `chktex` package)
+The extension offers to install missing tools through TeX Live or MiKTeX. The relevant package names are `latexindent`, `latex-formatter`, and `chktex`.
 
 ## Extension Settings
 
@@ -51,13 +53,15 @@ Both come with most `TeX` distributions (look for the `latexindent` and `chktex`
 
 ### Formatter
 
+- `latex.formatter.program`: Selects `latexindent` or `tex-fmt`.
+  - Default is `latexindent`.
 - `latex.formatter.columnLimit`: Sets the column limit for a given line. A column limit of `0` means that there is no column limit.
   - Default is `80`.
   - This is ignored if a configuration file is found in some parent of the file.
 - `latex.formatter.timeout`: Amount of time (in ms) to wait for the formatter to
   finish.
   - Default is `10000`.
-- `latex.formatter.config`: Absolute (or relative; see [Resolution Algorithm](#resolution-algorithm)) path to the configuration file for the formatter. Must end in `.yaml`.
+- `latex.formatter.config`: Absolute (or relative; see [Resolution Algorithm](#resolution-algorithm)) path to the selected formatter's YAML or TOML configuration file.
   - Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found. See [Resolution Algorithm](#resolution-algorithm).
 - `latex.formatter.path`: Absolute/relative path to the formatter executable.
   - Default behavior is to find the system's executable if it exists.
@@ -72,12 +76,14 @@ Configuration files are resolved through this extension rather than through the 
 
 #### Formatter
 
-In accordance with the resolution algorithm of the formatter, the configuration file names have the following priority:
+For `latexindent`, configuration file names have the following priority:
 
 1. `localSettings.yaml`
 2. `latexindent.yaml`
 3. `.localSettings.yaml`
 4. `.latexindent.yaml`
+
+For `tex-fmt`, the configuration file name is `tex-fmt.toml`.
 
 #### Linter
 
@@ -90,7 +96,9 @@ In accordance with the resolution algorithm of the linter, the configuration fil
 
 #### Formatter
 
-The formatter configuration file is written in YAML. See [their documentation](https://mirrors.ctan.org/support/latexindent/documentation/latexindent.pdf) for options.
+latexindent configuration files are written in YAML. See [the latexindent documentation](https://mirrors.ctan.org/support/latexindent/documentation/latexindent.pdf) for options.
+
+tex-fmt configuration files are written in TOML. See [the tex-fmt documentation](https://github.com/WGUNDERWOOD/tex-fmt#configuration) for options. Its platform-specific user configuration remains available when no project configuration is found.
 
 #### Linter
 
@@ -118,8 +126,6 @@ For example, if `latex.*.config` is `test/someconfig.yaml`, then if a file `F` i
 ## Known Limitations
 
 - Formatting/linting large files (> your RAM) is not possible because VS Code doesn't have a streaming API. (But why would your TeX file be that large?)
-- The formatter (for some reason) only takes files ending in `.yaml`.
-- For caching, if a configuration file is suddenly lower in priority than a new configuration (according to [Configuration File Names](#configuration-file-names)), then the new configuration file may not be noticed. In this case, reload the window.
 - If `-v` is specified in the `CmdLine` option of the linter configuration, the linter will break since `-v` overrides the extension's custom `-f` formatting for lint messages.
 
 ## Contributing

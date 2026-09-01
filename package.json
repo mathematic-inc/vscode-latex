@@ -77,20 +77,34 @@
           "default": "",
           "markdownDescription": "Absolute/relative path to the linter executable. Default behavior is to find the system's executable if it exists."
         },
+        "latex.formatter.program": {
+          "type": "string",
+          "enum": [
+            "latexindent",
+            "tex-fmt"
+          ],
+          "enumDescriptions": [
+            "Format with latexindent.",
+            "Format with tex-fmt."
+          ],
+          "default": "latexindent",
+          "markdownDescription": "Program used to format LaTeX documents."
+        },
         "latex.formatter.columnLimit": {
           "type": "number",
+          "minimum": 0,
           "default": 80,
           "markdownDescription": "Column limit for a given line.\n\nA column limit of `0` means that there is no column limit. This is overridden if a configuration file is found in some parent of the file."
         },
         "latex.formatter.config": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Absolute/relative path to the configuration file for the formatter. Must end in `.yaml`. Default behavior is to search the directory (or parents) of the file (or the workspace) till a configuration is found. See the extension's description."
+          "markdownDescription": "Absolute/relative path to the selected formatter's YAML or TOML configuration file. Default behavior is to search the directory and its parents. See the extension's description."
         },
         "latex.formatter.path": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Absolute/relative path to the formatter executable. Default behavior is to find the system's executable if it exists."
+          "markdownDescription": "Absolute/relative path to the selected formatter executable. Default behavior is to find the system's executable if it exists."
         },
         "latex.formatter.timeout": {
           "type": "number",
