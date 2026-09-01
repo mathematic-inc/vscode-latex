@@ -1,7 +1,7 @@
 {
   "name": "vscode-latex",
   "displayName": "LaTeX",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "LaTeX language support for Visual Studio Code.",
   "categories": [
     "Programming Languages",
