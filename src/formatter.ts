@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { devNull, platform } from "node:os";
-import { dirname, join, normalize } from "node:path";
+import { dirname } from "node:path";
 
 import type { Operation, Scope } from "effection";
 import {
@@ -28,26 +27,19 @@ import {
   window,
 } from "vscode";
 
-import { ConfigResolver, getConfig } from "./config";
+import { getConfig } from "./config";
 import { getErrorMessage } from "./executable";
-import { ExecutableResolver } from "./executable_resolver";
-import { execFile } from "./node";
+import type { ExecutableResolver } from "./executable_resolver";
+import * as latexindent from "./latexindent";
+import * as texFmt from "./tex_fmt";
 import { fromThenable, withCancellation } from "./vscode";
 
-const CONFIG_NAMES = [
-  "localSettings.yaml",
-  "latexindent.yaml",
-  ".localSettings.yaml",
-  ".latexindent.yaml",
-];
-const DEPENDENCIES = ["YAML::Tiny", "File::HomeDir", "Unicode::GCString"] as const;
-const EXECUTABLE = "latexindent";
-const INSTALL_DEPENDENCIES = "Install dependencies";
+type FormatterProgram = "latexindent" | "tex-fmt";
 
 export class Formatter implements DocumentFormattingEditProvider {
-  readonly #configResolver = new ConfigResolver("formatter.config", CONFIG_NAMES);
   readonly #scope: Scope;
-  #executableResolver: ExecutableResolver | undefined;
+  #latexindent: ExecutableResolver | undefined;
+  #texFmt: ExecutableResolver | undefined;
 
   constructor(scope: Scope) {
     this.#scope = scope;
@@ -62,25 +54,26 @@ export class Formatter implements DocumentFormattingEditProvider {
   }
 
   *#format(document: TextDocument, options: FormattingOptions): Operation<TextEdit[]> {
-    const executableResolver = yield* this.#getExecutableResolver();
+    const program = getConfig<FormatterProgram>("formatter.program", "latexindent");
+    const executableResolver = yield* this.#getExecutableResolver(program);
     const executable = yield* executableResolver.resolve(getConfig("formatter.path", ""));
     if (!executable) {
       return [];
     }
 
-    const config = yield* this.#configResolver.findConfig(document);
+    const implementation = program === "tex-fmt" ? texFmt : latexindent;
+    const config = yield* implementation.findConfig(document);
     const input = document.getText();
     let output: string;
     try {
-      output = yield* this.#execute(
-        input,
-        executable,
-        dirname(document.uri.fsPath),
-        options,
-        config,
-      );
+      const cwd = dirname(document.uri.fsPath);
+      output = yield* implementation.format(input, executable, cwd, options, config);
     } catch (error) {
-      yield* this.#handleError(error);
+      if (program === "latexindent") {
+        yield* latexindent.handleError(error);
+      } else {
+        yield* fromThenable(window.showErrorMessage(getErrorMessage(error)));
+      }
       return [];
     }
 
@@ -96,80 +89,12 @@ export class Formatter implements DocumentFormattingEditProvider {
     ];
   }
 
-  *#execute(
-    input: string,
-    executable: string,
-    cwd: string,
-    options: FormattingOptions,
-    configFilePath?: string,
-  ): Operation<string> {
-    const args = ["-g", devNull, "-m"];
-    if (configFilePath) {
-      args.push("-l", configFilePath);
-    } else {
-      const defaultIndent = options.insertSpaces ? " ".repeat(options.tabSize) : "\t";
-      args.push(
-        "-y",
-        `defaultIndent:'${defaultIndent}',` +
-          `modifyLineBreaks:textWrapOptions:columns:${getConfig("formatter.columnLimit", 80)}`,
-      );
+  *#getExecutableResolver(program: FormatterProgram): Operation<ExecutableResolver> {
+    if (program === "tex-fmt") {
+      this.#texFmt ??= texFmt.createResolver();
+      return this.#texFmt;
     }
-    args.push("-");
-
-    const { stdout } = yield* execFile(executable, args, {
-      cwd,
-      input,
-      timeout: getConfig("formatter.timeout", 10_000),
-    });
-    return stdout;
+    this.#latexindent ??= yield* latexindent.createResolver();
+    return this.#latexindent;
   }
-
-  *#handleError(error: unknown): Operation<void> {
-    const message = getErrorMessage(error);
-    if (
-      message.includes("Can't locate") &&
-      (yield* fromThenable(window.showErrorMessage(message, INSTALL_DEPENDENCIES))) ===
-        INSTALL_DEPENDENCIES
-    ) {
-      for (const dependency of DEPENDENCIES) {
-        try {
-          yield* execFile("cpanm", [dependency], { input: "yes\n" });
-        } catch (dependencyError) {
-          yield* fromThenable(
-            window.showErrorMessage(
-              `Could not install ${dependency}: ${getErrorMessage(dependencyError)}`,
-            ),
-          );
-          return;
-        }
-      }
-      return;
-    }
-    yield* fromThenable(window.showErrorMessage(message));
-  }
-
-  *#getExecutableResolver(): Operation<ExecutableResolver> {
-    this.#executableResolver ??= yield* createExecutableResolver();
-    return this.#executableResolver;
-  }
-}
-
-function* createExecutableResolver(): Operation<ExecutableResolver> {
-  const paths: string[] = [];
-  try {
-    const { stdout } = yield* execFile("kpsewhich", ["--var-value", "TEXMFDIST"], {
-      timeout: 5000,
-    });
-    const texmfDistribution = stdout.trim();
-    if (texmfDistribution) {
-      paths.push(join(normalize(texmfDistribution), "scripts", "latexindent"));
-    }
-  } catch {
-    // kpsewhich is optional; PATH lookup still runs.
-  }
-  return new ExecutableResolver(
-    EXECUTABLE,
-    platform() === "win32" ? [".exe", ".pl"] : [".pl"],
-    paths,
-  );
 }
