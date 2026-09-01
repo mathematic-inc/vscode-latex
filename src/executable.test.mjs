@@ -20,7 +20,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { findExecutable } from "./executable.ts";
+import { findExecutable, getExecutableInvocation, getTexPackageManagers } from "./executable.ts";
 
 test("returns the first executable from multiline locator output", (context) => {
   const directory = mkdtempSync(join(tmpdir(), "vscode-latex-"));
@@ -34,4 +34,27 @@ test("returns the first executable from multiline locator output", (context) => 
   }
 
   assert.equal(findExecutable(`${first}\r\n${second}\r\n`), first);
+});
+
+test("installs TeX packages with supported distribution managers", () => {
+  assert.deepEqual(getTexPackageManagers("chktex"), [
+    ["tlmgr", ["install", "chktex"]],
+    ["miktex", ["packages", "install", "chktex"]],
+    ["mpm", ["--install=chktex"]],
+  ]);
+});
+
+test("runs Windows batch package managers through cmd.exe", () => {
+  assert.deepEqual(
+    getExecutableInvocation(
+      "C:\\Program Files\\TeX Live\\tlmgr.bat",
+      ["install", "chktex"],
+      "win32",
+      "C:\\Windows\\System32\\cmd.exe",
+    ),
+    [
+      "C:\\Windows\\System32\\cmd.exe",
+      ["/d", "/c", '"C:\\Program Files\\TeX Live\\tlmgr.bat"', "install", "chktex"],
+    ],
+  );
 });

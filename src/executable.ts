@@ -16,6 +16,7 @@
 
 import { X_OK } from "node:constants";
 import { accessSync } from "node:fs";
+import { platform } from "node:os";
 
 export function findExecutable(output: string) {
   return output
@@ -31,4 +32,24 @@ export function isExecutable(file: string) {
   } catch {
     return false;
   }
+}
+
+export function getTexPackageManagers(packageName: string) {
+  return [
+    ["tlmgr", ["install", packageName]],
+    ["miktex", ["packages", "install", packageName]],
+    ["mpm", [`--install=${packageName}`]],
+  ] as const;
+}
+
+export function getExecutableInvocation(
+  executable: string,
+  args: readonly string[],
+  currentPlatform = platform(),
+  commandShell = process.env["ComSpec"] ?? "cmd.exe",
+): readonly [string, readonly string[]] {
+  if (currentPlatform === "win32" && /\.(?:bat|cmd)$/iv.test(executable)) {
+    return [commandShell, ["/d", "/c", `"${executable}"`, ...args]];
+  }
+  return [executable, args];
 }
