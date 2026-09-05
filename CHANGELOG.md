@@ -4,6 +4,13 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.2.1](https://github.com/mathematic-inc/vscode-latex/compare/v2.2.0...v2.2.1) (2026-09-05)
+
+
+### Bug Fixes
+
+* **ci:** Harden release workflows and repository checks ([#32](https://github.com/mathematic-inc/vscode-latex/issues/32)) ([d16449d](https://github.com/mathematic-inc/vscode-latex/commit/d16449d16f132c3ef82dc14547347032f8db01f5))
+
 ## [2.2.0](https://github.com/mathematic-inc/vscode-latex/compare/v2.1.0...v2.2.0) (2026-09-01)
 
 
