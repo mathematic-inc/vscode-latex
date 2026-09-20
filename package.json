@@ -564,7 +564,7 @@
     "onStartupFinished"
   ],
   "dependencies": {
-    "effection": "4.1.0"
+    "effection": "4.1.1"
   },
   "devDependencies": {
     "@types/node": "26.4.0",
