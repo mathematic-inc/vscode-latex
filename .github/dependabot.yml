@@ -15,6 +15,11 @@ updates:
 
   - package-ecosystem: npm
     directory: /
+    ignore:
+      # VSIX packaging requires types no newer than the minimum VS Code engine.
+      # Raise engines.vscode before allowing newer types.
+      - dependency-name: "@types/vscode"
+        versions: [">=1.135.0"]
     commit-message:
       prefix: "chore(deps)"
     schedule:
