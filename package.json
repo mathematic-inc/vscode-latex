@@ -569,7 +569,7 @@
   "devDependencies": {
     "@types/node": "26.6.1",
     "@types/vscode": "1.134.0",
-    "@vscode/vsce": "^3.9.2",
+    "@vscode/vsce": "^4.0.0",
     "tsup": "^8.5.1",
     "typescript": "^7.0.2",
     "vitest": "5.0.1"
