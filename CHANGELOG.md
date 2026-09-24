@@ -4,6 +4,16 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.2.2](https://github.com/mathematic-inc/vscode-latex/compare/v2.2.1...v2.2.2) (2026-09-24)
+
+
+### Bug Fixes
+
+* **deps:** Keep VS Code types within engine floor ([c82f3bc](https://github.com/mathematic-inc/vscode-latex/commit/c82f3bc59835df0f99e6cc44ab6b453bd170c810))
+* **deps:** Keep VS Code types within engine floor ([c82f3bc](https://github.com/mathematic-inc/vscode-latex/commit/c82f3bc59835df0f99e6cc44ab6b453bd170c810))
+* **deps:** Keep VS Code types within engine floor ([439210a](https://github.com/mathematic-inc/vscode-latex/commit/439210aec1b69ae1c8bb841e86afe874304b40d8))
+* **deps:** Remediate vulnerable transitive packages ([477f6e5](https://github.com/mathematic-inc/vscode-latex/commit/477f6e5c48a8976f8a5c8788845489a25e80310a))
+
 ## [2.2.1](https://github.com/mathematic-inc/vscode-latex/compare/v2.2.0...v2.2.1) (2026-09-05)
 
 
