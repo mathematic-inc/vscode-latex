@@ -13,8 +13,8 @@ importers:
   .:
     dependencies:
       effection:
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.1.1
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 26.6.1
@@ -1056,8 +1056,8 @@ packages:
     resolution: {integrity: sha512-UgGlf8IW75je7HZjNDpJdCv4cGJWIi6yumFdZ0R7A8/CIhQiWUjyGLCxdHpd8bmyD1gnkfUNK0oeOXqUS2cpfQ==}
     engines: {ecmascript: '>= es5', node: '>=4'}
 
-  effection@4.1.0:
-    resolution: {integrity: sha512-/BJuaYhzDrvC/nrIW054z1itmCNjVNFtyv/J26xrS4pP2MLfm5TG8VFe5f4zl1oGcAoF1fq1GfDO+v0qx6URPw==}
+  effection@4.1.1:
+    resolution: {integrity: sha512-Wcxbklo/8oxuOxJkEhSwwHxfyfdLuCvZ65OTQoFokHTwHdzfqDKB58YRyVyxT2vqIojv/wEPurzOB3RCoHXb4w==}
     engines: {node: '>= 16'}
 
   emoji-regex@8.0.0:
@@ -2976,7 +2976,7 @@ snapshots:
     dependencies:
       version-range: 4.15.0
 
-  effection@4.1.0: {}
+  effection@4.1.1: {}
 
   emoji-regex@8.0.0: {}
 
