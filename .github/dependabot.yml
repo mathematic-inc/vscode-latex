@@ -6,10 +6,6 @@ updates:
       codeql:
         patterns:
           - "github/codeql-action/*"
-    groups:
-      codeql:
-        patterns:
-          - github/codeql-action
     commit-message:
       prefix: "chore(deps)"
     schedule:
