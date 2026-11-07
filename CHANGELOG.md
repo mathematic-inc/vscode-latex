@@ -4,6 +4,14 @@ All notable changes to the "vscode-latex" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.2.4](https://github.com/mathematic-inc/vscode-latex/compare/v2.2.3...v2.2.4) (2026-11-07)
+
+
+### Bug Fixes
+
+* **deps:** Update dependencies across the stack ([#77](https://github.com/mathematic-inc/vscode-latex/issues/77)) ([d42f495](https://github.com/mathematic-inc/vscode-latex/commit/d42f495995e4a52028060168643d47a6d5955c32))
+* Replace deprecated APIs and tooling ([#79](https://github.com/mathematic-inc/vscode-latex/issues/79)) ([94476e3](https://github.com/mathematic-inc/vscode-latex/commit/94476e3a747003d26c3d0bf1f6d19a856af04b97))
+
 ## [2.2.3](https://github.com/mathematic-inc/vscode-latex/compare/v2.2.2...v2.2.3) (2026-09-27)
 
 
