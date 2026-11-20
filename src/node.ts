@@ -41,7 +41,7 @@ export function* execFile(
           if (error === null) {
             resolve({ stdout, stderr });
           } else {
-            // The callers read the output of a failed run from the error.
+            // Callers read a failed run's output from the error.
             reject(Object.assign(error, { stdout, stderr }));
           }
         },

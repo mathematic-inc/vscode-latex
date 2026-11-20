@@ -50,7 +50,7 @@ sections {
           new {
             allow =
               List(
-                // The classes and interfaces of the VS Code API have methods and mutable members.
+                // VS Code API types have methods and mutable members.
                 new Dynamic {
                   from = "package"
                   `package` = "vscode"
@@ -68,13 +68,13 @@ sections {
                       "Thenable",
                     )
                 },
-                // The operations and the scope of effection have methods.
+                // Operation and Scope have methods.
                 new Dynamic {
                   from = "package"
                   `package` = "effection"
                   name = List("Operation", "Scope")
                 },
-                // Error has the mutable members name, message and stack.
+                // Error has mutable members.
                 new Dynamic {
                   from = "lib"
                   name = List("Error")
