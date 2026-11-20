@@ -28,3 +28,11 @@ Install the pinned tools and Git hooks before working in the repository:
 mise install
 hk install
 ```
+
+Run the checks before you push:
+
+```sh
+mise run check
+```
+
+Run `mise run fix` to fix the problems that the checks can fix.
