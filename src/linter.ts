@@ -43,7 +43,7 @@ export class Linter {
 
   *lint(document: TextDocument): Operation<readonly Diagnostic[]> {
     const executable = yield* this.#executableResolver.resolve(getConfig("linter.path", ""));
-    if (!executable) {
+    if (executable === undefined) {
       return [];
     }
 
@@ -58,7 +58,7 @@ export class Linter {
       );
     } catch (error) {
       const diagnosticOutput = getChkTexDiagnosticOutput(error);
-      if (!diagnosticOutput) {
+      if (diagnosticOutput === undefined || diagnosticOutput === "") {
         yield* fromThenable(window.showErrorMessage(getErrorMessage(error)));
         return [];
       }
@@ -74,7 +74,7 @@ export class Linter {
   *#execute(input: string, executable: string, cwd: string, config?: string): Operation<string> {
     const args: string[] = [];
 
-    if (config) {
+    if (config !== undefined) {
       args.push("-l", config);
     }
 

@@ -19,7 +19,7 @@ const OUTPUT_LINE = /^([^:]+):([^:]+):(\d+):(\d+):(\d+):(.*)$/v;
 export function parseChkTexOutputLine(line: string) {
   const match = OUTPUT_LINE.exec(line);
   if (!match) {
-    return;
+    return undefined;
   }
   return {
     severity: match[1]!,
@@ -33,8 +33,8 @@ export function parseChkTexOutputLine(line: string) {
 
 export function getChkTexDiagnosticOutput(error: unknown) {
   if (
-    error &&
     typeof error === "object" &&
+    error !== null &&
     "code" in error &&
     (error.code === 2 || error.code === 3) &&
     "stdout" in error &&
@@ -42,5 +42,5 @@ export function getChkTexDiagnosticOutput(error: unknown) {
   ) {
     return error.stdout;
   }
-  return;
+  return undefined;
 }

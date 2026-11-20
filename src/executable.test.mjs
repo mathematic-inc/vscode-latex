@@ -26,7 +26,9 @@ import { findExecutable, getExecutableInvocation, getTexPackageManagers } from "
 
 test("returns the first executable from multiline locator output", async () => {
   const directory = mkdtempSync(join(tmpdir(), "vscode-latex-"));
-  onTestFinished(() => rmSync(directory, { recursive: true }));
+  onTestFinished(() => {
+    rmSync(directory, { recursive: true });
+  });
 
   const first = join(directory, "first");
   const second = join(directory, "second");

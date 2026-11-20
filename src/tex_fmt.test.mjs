@@ -20,7 +20,9 @@ import { run } from "effection";
 import { beforeEach, test, vi } from "vitest";
 
 const execFile = vi.hoisted(() => vi.fn());
-const getConfig = vi.hoisted(() => vi.fn((_section, defaultValue) => defaultValue));
+const getConfig = vi.hoisted(() =>
+  vi.fn((/** @type {string} */ _section, /** @type {unknown} */ defaultValue) => defaultValue),
+);
 const ExecutableResolver = vi.hoisted(() => vi.fn());
 vi.mock("node:os", () => ({ platform: () => "win32" }));
 vi.mock("./node", () => ({ execFile }));

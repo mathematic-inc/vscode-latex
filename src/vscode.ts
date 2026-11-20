@@ -32,11 +32,15 @@ export function* withCancellation<T, F>(
   return yield* race([
     operation,
     action<T | F>((resolve) => {
-      const disposable = token.onCancellationRequested(() => resolve(fallback));
+      const disposable = token.onCancellationRequested(() => {
+        resolve(fallback);
+      });
       if (token.isCancellationRequested) {
         resolve(fallback);
       }
-      return () => disposable.dispose();
+      return () => {
+        disposable.dispose();
+      };
     }),
   ]);
 }
