@@ -14,41 +14,47 @@
  * limitations under the License.
  */
 
-import {
-  execFile as execFileCallback,
-  type ExecFileOptions as NodeExecFileOptions,
-} from "node:child_process";
-import type { PathLike, Stats } from "node:fs";
+import { execFile as execFileCallback } from "node:child_process";
+import type { Stats } from "node:fs";
 import { access as accessPromise, stat as statPromise } from "node:fs/promises";
-import { promisify } from "node:util";
 
 import { type Operation, until, useAbortSignal } from "effection";
 
-const execFilePromise = promisify(execFileCallback);
+type ExecFileOptions = Readonly<{ cwd?: string; input?: string; timeout?: number }>;
 
-type ExecFileOptions = Omit<NodeExecFileOptions, "signal"> & { input?: string };
+type ExecFileOutput = { stdout: string; stderr: string };
 
 export function* execFile(
   executable: string,
   args: readonly string[],
   options: ExecFileOptions = {},
-): Operation<{ stdout: string; stderr: string }> {
+): Operation<ExecFileOutput> {
   const { input, ...execOptions } = options;
   const signal = yield* useAbortSignal();
-  const execution = execFilePromise(executable, args, {
-    windowsHide: true,
-    ...execOptions,
-    encoding: "utf8",
-    signal,
-  });
-  execution.child.stdin?.end(input);
-  return yield* until(execution);
+  return yield* until(
+    new Promise<ExecFileOutput>((resolve, reject) => {
+      const child = execFileCallback(
+        executable,
+        args,
+        { windowsHide: true, ...execOptions, encoding: "utf8", signal },
+        (error: Error | null, stdout: string, stderr: string) => {
+          if (error === null) {
+            resolve({ stdout, stderr });
+          } else {
+            // The callers read the output of a failed run from the error.
+            reject(Object.assign(error, { stdout, stderr }));
+          }
+        },
+      );
+      child.stdin?.end(input);
+    }),
+  );
 }
 
-export function* access(path: PathLike, mode?: number): Operation<void> {
+export function* access(path: string, mode?: number): Operation<void> {
   yield* until(accessPromise(path, mode));
 }
 
-export function* stat(path: PathLike): Operation<Stats> {
+export function* stat(path: string): Operation<Stats> {
   return yield* until(statPromise(path));
 }
