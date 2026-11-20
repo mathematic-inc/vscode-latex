@@ -60,7 +60,7 @@ export class ConfigResolver {
 
       const parent = dirname(directory);
       if (parent === directory) {
-        return;
+        return undefined;
       }
       directory = parent;
     }

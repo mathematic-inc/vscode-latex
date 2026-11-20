@@ -1,0 +1,105 @@
+amends
+  "package://github.com/mathematic-inc/toolconfig/releases/download/v2026.11.6/toolconfig@2026.11.6#/ToolConfig.pkl"
+
+root = true
+
+toolconfig {
+  `extends` =
+    List(new Repository {
+      git = "https://github.com/mathematic-inc/toolconfig-config.git"
+      rev = "fc76ddad46c14a7b7fe03bf117a92ede11ea0dfb"
+      path = "profiles/org/.toolconfig.pkl"
+    })
+}
+
+sections {
+  ["*"] {
+    // The copy script writes snippets and syntax from the third_party submodule.
+    oxfmt {
+      ignorePatterns =
+        List(
+          "**/dist/**",
+          "**/gen/**",
+          "**/generated/**",
+          "**/node_modules/**",
+          "**/target/**",
+          "**/vendor/**",
+          "**/*.md",
+          "**/*.toml",
+          "snippets/**",
+          "syntax/**",
+          "third_party/**",
+        )
+    }
+    oxlint {
+      ignorePatterns =
+        List(
+          "**/dist/**",
+          "**/gen/**",
+          "**/generated/**",
+          "**/node_modules/**",
+          "**/target/**",
+          "**/vendor/**",
+          "snippets/**",
+          "syntax/**",
+          "third_party/**",
+        )
+      rules {
+        ["typescript/prefer-readonly-parameter-types"] {
+          "deny"
+          new {
+            allow =
+              List(
+                // VS Code API types have methods and mutable members.
+                new Dynamic {
+                  from = "package"
+                  `package` = "vscode"
+                  name =
+                    List(
+                      "CancellationToken",
+                      "ConfigurationChangeEvent",
+                      "DocumentSelector",
+                      "ExtensionContext",
+                      "FormattingOptions",
+                      "Progress",
+                      "TextDocument",
+                      "TextDocumentChangeEvent",
+                      "TextEditor",
+                      "Thenable",
+                    )
+                },
+                // Operation and Scope have methods.
+                new Dynamic {
+                  from = "package"
+                  `package` = "effection"
+                  name = List("Operation", "Scope")
+                },
+                // Error has mutable members.
+                new Dynamic {
+                  from = "lib"
+                  name = List("Error")
+                },
+              )
+          }
+        }
+      }
+    }
+    typos {
+      files {
+        ["extend-exclude"] =
+          List(
+            "**/dist/**",
+            "**/gen/**",
+            "**/generated/**",
+            "**/node_modules/**",
+            "**/target/**",
+            "**/vendor/**",
+            "CHANGELOG.md",
+            "snippets/**",
+            "syntax/**",
+            "third_party/**",
+          )
+      }
+    }
+  }
+}

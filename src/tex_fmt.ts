@@ -46,9 +46,7 @@ export function* format(
   config?: string,
 ): Operation<string> {
   const args = ["--stdin"];
-  if (config) {
-    args.push("--config", config);
-  } else {
+  if (config === undefined) {
     const columnLimit = getConfig<number>("formatter.columnLimit", 80);
     args.push(columnLimit === 0 ? "--nowrap" : "--wraplen");
     if (columnLimit !== 0) {
@@ -58,6 +56,8 @@ export function* format(
     if (!options.insertSpaces) {
       args.push("--usetabs");
     }
+  } else {
+    args.push("--config", config);
   }
 
   const endsWithNewline = /\r?\n$/v.test(input);

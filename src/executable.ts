@@ -28,7 +28,7 @@ export function* findExecutable(output: string): Operation<string | undefined> {
       return file;
     }
   }
-  return;
+  return undefined;
 }
 
 export function* isExecutable(file: string): Operation<boolean> {
@@ -62,8 +62,8 @@ export function getExecutableInvocation(
 
 export function getErrorMessage(error: unknown) {
   if (
-    error &&
     typeof error === "object" &&
+    error !== null &&
     "stderr" in error &&
     typeof error.stderr === "string" &&
     error.stderr.trim()

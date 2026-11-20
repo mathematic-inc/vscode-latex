@@ -22,10 +22,12 @@ import { test } from "vitest";
 import { withCancellation } from "./vscode";
 
 test("cancellation wins and tears down the pending operation", async () => {
+  /** @type {() => void} */
   let cancel;
   let stopped = false;
   const token = {
     isCancellationRequested: false,
+    /** @param {() => void} listener */
     onCancellationRequested(listener) {
       cancel = listener;
       return { dispose() {} };

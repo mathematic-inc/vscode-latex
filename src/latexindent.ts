@@ -67,15 +67,15 @@ export function* format(
   config?: string,
 ): Operation<string> {
   const args = ["-g", devNull, "-m"];
-  if (config) {
-    args.push("-l", config);
-  } else {
+  if (config === undefined) {
     const defaultIndent = options.insertSpaces ? " ".repeat(options.tabSize) : "\t";
     args.push(
       "-y",
       `defaultIndent:'${defaultIndent}',` +
         `modifyLineBreaks:textWrapOptions:columns:${getConfig("formatter.columnLimit", 80)}`,
     );
+  } else {
+    args.push("-l", config);
   }
   args.push("-");
 

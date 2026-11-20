@@ -31,3 +31,15 @@ test("executes files asynchronously with standard input", async () => {
   );
   assert.equal(stdout, "LaTeX");
 });
+
+test("attaches the output of a failed execution to the error", async () => {
+  await assert.rejects(
+    run(() =>
+      execFile(process.execPath, [
+        "--eval",
+        "process.stdout.write('out'); process.stderr.write('err'); process.exit(2)",
+      ]),
+    ),
+    { code: 2, stderr: "err", stdout: "out" },
+  );
+});

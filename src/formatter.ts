@@ -57,7 +57,7 @@ export class Formatter implements DocumentFormattingEditProvider {
     const program = getConfig<FormatterProgram>("formatter.program", "latexindent");
     const executableResolver = yield* this.#getExecutableResolver(program);
     const executable = yield* executableResolver.resolve(getConfig("formatter.path", ""));
-    if (!executable) {
+    if (executable === undefined) {
       return [];
     }
 

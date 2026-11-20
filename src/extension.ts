@@ -27,7 +27,7 @@ const LATEX = {
 };
 
 export function activate(context: ExtensionContext) {
-  if (!context.globalState.get<boolean>("supportPromptShown")) {
+  if (context.globalState.get<boolean>("supportPromptShown") !== true) {
     void context.globalState.update("supportPromptShown", true);
     void window
       .showInformationMessage(
@@ -43,7 +43,7 @@ export function activate(context: ExtensionContext) {
 
   const [scope, destroy] = createScope();
   const linter = new Linter();
-  scope.run(() => registerLinter(LATEX, (document) => linter.lint(document)));
+  void scope.run(() => registerLinter(LATEX, (document) => linter.lint(document)));
   context.subscriptions.push(
     languages.registerDocumentFormattingEditProvider(LATEX, new Formatter(scope)),
     new Disposable(() => {

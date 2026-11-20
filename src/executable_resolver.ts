@@ -42,8 +42,8 @@ export class ExecutableResolver {
 
   constructor(
     name: string,
-    extensions: Iterable<string>,
-    paths: Iterable<string> = [],
+    extensions: readonly string[],
+    paths: readonly string[] = [],
     packageName = name,
   ) {
     this.#name = name;
@@ -58,7 +58,7 @@ export class ExecutableResolver {
     }
 
     const executable = yield* ExecutableResolver.#findExecutableInPath(configuredPath);
-    if (!executable) {
+    if (executable === undefined) {
       yield* fromThenable(
         window.showErrorMessage(
           `Specified path ${configuredPath} could not be found${
@@ -74,7 +74,7 @@ export class ExecutableResolver {
     let executable = normalize(path);
     if (isAbsolute(executable)) {
       if (!(yield* isExecutable(executable))) {
-        return;
+        return undefined;
       }
     } else {
       let found = false;
@@ -87,7 +87,7 @@ export class ExecutableResolver {
         }
       }
       if (!found) {
-        return;
+        return undefined;
       }
     }
     return executable;
@@ -95,7 +95,7 @@ export class ExecutableResolver {
 
   *#findOrInstall(): Operation<string | undefined> {
     const executable = yield* this.#resolveExecutable();
-    if (executable) {
+    if (executable !== undefined) {
       return executable;
     }
 
@@ -116,14 +116,14 @@ export class ExecutableResolver {
         window.showErrorMessage(`${this.#name} could not be found.`, INSTALL),
       )) !== INSTALL
     ) {
-      return;
+      return undefined;
     }
 
     const scope = yield* useScope();
     const managerExtensions = platform() === "win32" ? [".exe", ".bat", ".cmd"] : [];
     for (const [name, args] of getTexPackageManagers(this.#packageName)) {
       const manager = yield* new ExecutableResolver(name, managerExtensions).#resolveExecutable();
-      if (!manager) {
+      if (manager === undefined) {
         continue;
       }
       const [command, commandArgs] = getExecutableInvocation(manager, args);
@@ -140,17 +140,17 @@ export class ExecutableResolver {
           ),
         );
         if (!result) {
-          return;
+          return undefined;
         }
       } catch (error) {
         yield* fromThenable(
           window.showErrorMessage(`Could not install ${this.#name}: ${getErrorMessage(error)}`),
         );
-        return;
+        return undefined;
       }
 
       const executable = yield* this.#resolveExecutable();
-      if (!executable) {
+      if (executable === undefined) {
         yield* fromThenable(
           window.showErrorMessage(
             `${this.#name} was installed but could not be found. Reload VS Code and try again.`,
@@ -165,11 +165,11 @@ export class ExecutableResolver {
         `Could not install ${this.#name}: no TeX Live or MiKTeX package manager was found.`,
       ),
     );
-    return;
+    return undefined;
   }
 
   *#resolveExecutable(): Operation<string | undefined> {
-    if (this.#executable && (yield* isExecutable(this.#executable))) {
+    if (this.#executable !== undefined && (yield* isExecutable(this.#executable))) {
       return this.#executable;
     }
 
@@ -187,7 +187,7 @@ export class ExecutableResolver {
       try {
         const { stdout } = yield* execFile(which, [filename]);
         const executable = yield* findExecutable(stdout);
-        if (executable) {
+        if (executable !== undefined) {
           this.#executable = executable;
           return executable;
         }
@@ -196,6 +196,6 @@ export class ExecutableResolver {
       }
     }
 
-    return;
+    return undefined;
   }
 }
