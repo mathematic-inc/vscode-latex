@@ -8,6 +8,7 @@
     "types": ["node"],
     "rootDir": "src",
     "noEmit": true,
+    "allowJs": true,
     "strict": true,
     "erasableSyntaxOnly": true,
     "isolatedModules": true,
